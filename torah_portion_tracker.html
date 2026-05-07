@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>토라 포션 트래커 — 베하르-베추코타이</title>
+  <title>토라 포션 트래커</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
@@ -54,12 +54,41 @@
       padding: 2.5rem 1rem;
     }
 
-    .container {
-      width: 100%;
-      max-width: 680px;
+    .container { width: 100%; max-width: 680px; }
+
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 0;
+      gap: 12px;
+      color: var(--text-tertiary);
+      font-size: 14px;
     }
 
-    /* 헤더 */
+    .loading-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border-tertiary);
+      border-top-color: var(--text-info);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-box {
+      background: var(--bg-primary);
+      border: 0.5px solid var(--border-tertiary);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
     .week-header {
       display: flex;
       align-items: flex-start;
@@ -85,22 +114,12 @@
     }
 
     .portion-hebrew {
-      font-size: 18px;
+      display: inline;
+      font-size: 20px;
       color: var(--text-secondary);
-      margin-top: 4px;
-      direction: rtl;
       font-family: serif;
-    }
-
-    .source-badge {
-      font-size: 11px;
-      color: var(--text-tertiary);
-      margin-top: 6px;
-    }
-
-    .source-badge a {
-      color: var(--text-info);
-      text-decoration: none;
+      direction: rtl;
+      unicode-bidi: embed;
     }
 
     .week-badge {
@@ -114,7 +133,6 @@
       flex-shrink: 0;
     }
 
-    /* 구분선 라벨 */
     .section-label {
       font-size: 11px;
       font-weight: 500;
@@ -124,7 +142,6 @@
       margin-bottom: 10px;
     }
 
-    /* 정보 카드 */
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -139,51 +156,9 @@
       padding: 12px 14px;
     }
 
-    .info-card-label {
-      font-size: 12px;
-      color: var(--text-tertiary);
-      margin-bottom: 4px;
-    }
+    .info-card-label { font-size: 12px; color: var(--text-tertiary); margin-bottom: 4px; }
+    .info-card-value { font-size: 14px; font-weight: 500; color: var(--text-primary); }
 
-    .info-card-value {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-primary);
-    }
-
-    /* 요약 */
-    .summary-box {
-      background: var(--bg-primary);
-      border: 0.5px solid var(--border-tertiary);
-      border-radius: var(--radius-lg);
-      padding: 1rem 1.25rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .summary-text {
-      font-size: 14px;
-      color: var(--text-secondary);
-      line-height: 1.8;
-    }
-
-    /* 키워드 */
-    .keywords {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 1.5rem;
-    }
-
-    .keyword {
-      background: var(--bg-primary);
-      border: 0.5px solid var(--border-tertiary);
-      border-radius: 100px;
-      padding: 4px 14px;
-      font-size: 13px;
-      color: var(--text-primary);
-    }
-
-    /* 캘린더 */
     .calendar {
       background: var(--bg-primary);
       border: 0.5px solid var(--border-tertiary);
@@ -222,11 +197,7 @@
     .cal-row:last-child { border-bottom: none; }
     .cal-row:hover { background: var(--bg-secondary); }
     .cal-row.checked { opacity: 0.5; }
-
-    .cal-row.today .day-name {
-      color: var(--text-info);
-      font-weight: 500;
-    }
+    .cal-row.today .day-name { color: var(--text-info); font-weight: 500; }
 
     .today-dot {
       display: inline-block;
@@ -263,7 +234,6 @@
     .check-btn i { font-size: 14px; color: transparent; }
     .check-btn.done i { color: var(--text-success); }
 
-    /* 진행률 */
     .progress-bar-wrap { margin-bottom: 2rem; }
 
     .progress-top {
@@ -288,7 +258,6 @@
       transition: width 0.35s ease;
     }
 
-    /* 푸터 */
     .footer {
       text-align: center;
       font-size: 12px;
@@ -306,122 +275,240 @@
   </style>
 </head>
 <body>
-  <div class="container">
-
-    <div class="week-header">
-      <div>
-        <div class="portion-title">이번 주 토라 포션 · 5786년</div>
-        <div class="portion-name">베하르-베추코타이</div>
-        <div class="portion-hebrew">בְּהַר־בְּחֻקֹּתַי</div>
-        <div class="source-badge">출처: <a href="https://www.hebcal.com/sedrot/" target="_blank">hebcal.com</a> (Diaspora 일정)</div>
-      </div>
-      <div>
-        <div class="week-badge">레위기 마지막 포션</div>
-      </div>
+  <div class="container" id="app">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <span>포션 정보 불러오는 중...</span>
     </div>
-
-    <div class="info-grid">
-      <div class="info-card">
-        <div class="info-card-label">성경 범위</div>
-        <div class="info-card-value">레위기 25:1 – 27:34</div>
-      </div>
-      <div class="info-card">
-        <div class="info-card-label">샤밧 낭독일</div>
-        <div class="info-card-value">2026년 5월 9일 (토)</div>
-      </div>
-    </div>
-
-    <div class="section-label">이번 주 요약</div>
-    <div class="summary-box">
-      <div class="summary-text">
-        <strong style="font-weight:500">베하르</strong> — 안식년(쉬미타)과 희년(요벨)의 법을 다룹니다. 7년마다 땅을 쉬게 하고, 50년째 되는 해에는 모든 땅이 원래 주인에게 돌아가며 빚이 탕감됩니다.<br><br>
-        <strong style="font-weight:500">베추코타이</strong> — 레위기의 마지막 포션으로, 하나님의 율법에 순종할 때 오는 축복과 불순종할 때 오는 징계를 기록합니다. 서원과 헌물에 관한 법으로 마무리됩니다.
-      </div>
-    </div>
-
-    <div class="section-label">핵심 키워드</div>
-    <div class="keywords">
-      <span class="keyword">안식년 (쉬미타)</span>
-      <span class="keyword">희년 (요벨)</span>
-      <span class="keyword">토지 무르기</span>
-      <span class="keyword">축복과 징계</span>
-      <span class="keyword">서원의 법</span>
-    </div>
-
-    <div class="section-label">일별 읽기 체크 (5/4 – 5/10)</div>
-    <div class="calendar" id="calendar">
-      <div class="cal-header">
-        <span>요일</span>
-        <span>읽기 범위</span>
-        <span style="text-align:right">완료</span>
-      </div>
-    </div>
-
-    <div class="progress-bar-wrap">
-      <div class="progress-top">
-        <span style="font-size:13px; color:var(--text-secondary)">주간 진행률</span>
-        <span style="font-size:13px; font-weight:500; color:var(--text-primary)" id="progress-text">0 / 7일</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
-      </div>
-    </div>
-
-    <div class="footer">
-      토라 포션 일정 데이터 제공: <a href="https://www.hebcal.com/sedrot/" target="_blank">Hebcal Jewish Calendar</a>
-    </div>
-
   </div>
 
   <script>
-    const days = [
-      { day: "일요일", date: "5월 4일", range: "레위기 25:1–18", today: false },
-      { day: "월요일", date: "5월 5일", range: "레위기 25:19–38", today: false },
-      { day: "화요일", date: "5월 6일", range: "레위기 25:39–55", today: false },
-      { day: "수요일", date: "5월 7일", range: "레위기 26:1–13", today: true },
-      { day: "목요일", date: "5월 8일", range: "레위기 26:14–46", today: false },
-      { day: "금요일", date: "5월 9일", range: "레위기 27:1–34", today: false },
-      { day: "토요일", date: "5월 10일", range: "전체 낭독 (샤밧)", today: false },
-    ];
+    const DAY_KO = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+    const MONTH_KO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 
-    const checked = new Array(7).fill(false);
-    const cal = document.getElementById('calendar');
+    const BOOK_MAP = {
+      'Genesis':'창세기','Exodus':'출애굽기','Leviticus':'레위기',
+      'Numbers':'민수기','Deuteronomy':'신명기'
+    };
 
-    function render() {
-      document.querySelectorAll('.cal-row').forEach((r, i) => {
-        r.classList.toggle('checked', checked[i]);
-        const btn = r.querySelector('.check-btn');
-        btn.classList.toggle('done', checked[i]);
-        btn.querySelector('i').style.color = checked[i] ? 'var(--text-success)' : 'transparent';
-      });
-      const count = checked.filter(Boolean).length;
-      document.getElementById('progress-text').textContent = count + ' / 7일';
-      document.getElementById('progress-fill').style.width = Math.round(count / 7 * 100) + '%';
+    // 토라 포션 54개 한국어 이름 매핑
+    const PARSHA_KO = {
+      'Bereshit':'베레쉬트','Noach':'노아흐','Lech-Lecha':'레흐-레하',
+      'Vayeira':'바예라','Chayei Sara':'하예이 사라','Toldot':'톨도트',
+      'Vayetzei':'바예체이','Vayishlach':'바이슐라흐','Vayeshev':'바예쉐브',
+      'Miketz':'미케츠','Vayigash':'바이가쉬','Vayechi':'바예히',
+      'Shemot':'쉐모트','Vaeira':'바에라','Bo':'보',
+      'Beshalach':'베샬라흐','Yitro':'이트로','Mishpatim':'미쉬파팀',
+      'Terumah':'테루마','Tetzaveh':'테차베','Ki Tisa':'키 티사',
+      'Vayakhel':'바야크헬','Pekudei':'페쿠데이','Vayakhel-Pekudei':'바야크헬-페쿠데이',
+      'Vayikra':'바이크라','Tzav':'차브','Shmini':'쉬미니',
+      'Tazria':'타즈리아','Metzora':'메초라','Tazria-Metzora':'타즈리아-메초라',
+      'Achrei Mot':'아하레이 모트','Kedoshim':'케도쉼','Achrei Mot-Kedoshim':'아하레이 모트-케도쉼',
+      'Emor':'에모르','Behar':'베하르','Bechukotai':'베추코타이',
+      'Behar-Bechukotai':'베하르-베추코타이',
+      'Bamidbar':'바미드바르','Nasso':'나소','Beha\'alotcha':'베하알로트하',
+      'Sh\'lach':'쉘라흐','Korach':'코라흐','Chukat':'후카트',
+      'Balak':'발락','Chukat-Balak':'후카트-발락','Pinchas':'핀하스',
+      'Matot':'마토트','Masei':'마세이','Matot-Masei':'마토트-마세이',
+      'Devarim':'데바림','Vaetchanan':'바에트하난','Eikev':'에케브',
+      'Re\'eh':'레에','Shoftim':'쇼프팀','Ki Teitzei':'키 테체이',
+      'Ki Tavo':'키 타보','Nitzavim':'니차빔','Vayeilech':'바옐레흐',
+      'Nitzavim-Vayeilech':'니차빔-바옐레흐','Ha\'azinu':'하아지누',
+      'Vezot Haberakhah':'베조트 하베라하'
+    };
+
+    function parshaKo(enTitle) {
+      // "Parashat Behar-Bechukotai" → "Behar-Bechukotai" 추출
+      const name = enTitle.replace(/^Parashat\s+/i, '').trim();
+      return PARSHA_KO[name] || name;
     }
 
-    days.forEach((d, i) => {
-      const row = document.createElement('div');
-      row.className = 'cal-row' + (d.today ? ' today' : '');
-      row.innerHTML = `
-        <div>
-          <div class="day-name">${d.day}${d.today ? '<span class="today-dot"></span>' : ''}</div>
-          <div class="day-date">${d.date}</div>
+    function bookKo(str) {
+      if (!str) return '';
+      for (const [en, ko] of Object.entries(BOOK_MAP)) {
+        if (str.includes(en)) str = str.replace(en, ko);
+      }
+      return str;
+    }
+
+    function toISO(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function toKoDate(dateStr) {
+      const [y,m,d] = dateStr.split('-').map(Number);
+      return `${MONTH_KO[m-1]} ${d}일`;
+    }
+
+    // 이번 주 일요일~토요일 날짜 배열 반환
+    function getWeekDates() {
+      const now = new Date();
+      const day = now.getDay(); // 0=일요일
+      const sunday = new Date(now);
+      sunday.setDate(now.getDate() - day);
+      const dates = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(sunday);
+        d.setDate(sunday.getDate() + i);
+        dates.push(toISO(d));
+      }
+      return dates; // [일,월,화,수,목,금,토]
+    }
+
+    function storageKey(name) {
+      return 'torah-tracker-' + name.toLowerCase().replace(/[\s/]+/g,'-');
+    }
+
+    function renderPage(parshaTitle, parshaHebrew, shabbatDate, fullRange, aliyot, weekDates) {
+      const today = toISO(new Date());
+      const key = storageKey(parshaTitle);
+      const saved = localStorage.getItem(key);
+      const checked = saved ? JSON.parse(saved) : new Array(7).fill(false);
+
+      // 알리야 7개를 일별로 배분 (토요일은 항상 '전체 낭독')
+      const dailyRanges = [];
+      for (let i = 0; i < 6; i++) {
+        dailyRanges.push(aliyot[i] ? bookKo(aliyot[i]) : bookKo(fullRange));
+      }
+      dailyRanges.push('전체 낭독 (샤밧)');
+
+      const weekStart = toKoDate(weekDates[0]);
+      const weekEnd   = toKoDate(weekDates[6]);
+
+      document.getElementById('app').innerHTML = `
+        <div class="week-header">
+          <div>
+            <div class="portion-title">이번 주 토라 포션</div>
+            <div class="portion-name">${parshaTitle} <span class="portion-hebrew">(${parshaHebrew})</span></div>
+          </div>
+          <div>
+            <div class="week-badge">Hebcal 자동 연동</div>
+          </div>
         </div>
-        <div class="range">${d.range}</div>
-        <div class="check-wrap">
-          <button class="check-btn" aria-label="${d.day} 읽기 완료 표시">
-            <i class="ti ti-check" aria-hidden="true"></i>
-          </button>
+
+        <div class="info-grid">
+          <div class="info-card">
+            <div class="info-card-label">성경 범위</div>
+            <div class="info-card-value">${bookKo(fullRange)}</div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-label">샤밧 낭독일</div>
+            <div class="info-card-value">${toKoDate(shabbatDate)} (토)</div>
+          </div>
+        </div>
+
+        <div class="section-label">일별 읽기 체크 (${weekStart} – ${weekEnd})</div>
+        <div class="calendar" id="calendar">
+          <div class="cal-header">
+            <span>요일</span>
+            <span>읽기 범위</span>
+            <span style="text-align:right">완료</span>
+          </div>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-top">
+            <span style="font-size:13px; color:var(--text-secondary)">주간 진행률</span>
+            <span style="font-size:13px; font-weight:500; color:var(--text-primary)" id="progress-text">0 / 7일</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="footer">
+          포션 일정: <a href="https://www.hebcal.com/sedrot/" target="_blank">Hebcal Jewish Calendar</a>
         </div>
       `;
-      row.addEventListener('click', () => {
-        checked[i] = !checked[i];
-        render();
-      });
-      cal.appendChild(row);
-    });
 
-    render();
+      const cal = document.getElementById('calendar');
+
+      function save() { localStorage.setItem(key, JSON.stringify(checked)); }
+
+      function render() {
+        document.querySelectorAll('.cal-row').forEach((r, i) => {
+          r.classList.toggle('checked', checked[i]);
+          const btn = r.querySelector('.check-btn');
+          btn.classList.toggle('done', checked[i]);
+          btn.querySelector('i').style.color = checked[i] ? 'var(--text-success)' : 'transparent';
+        });
+        const count = checked.filter(Boolean).length;
+        document.getElementById('progress-text').textContent = count + ' / 7일';
+        document.getElementById('progress-fill').style.width = Math.round(count / 7 * 100) + '%';
+      }
+
+      weekDates.forEach((dateStr, i) => {
+        const d = new Date(dateStr + 'T00:00:00');
+        const isToday = dateStr === today;
+        const row = document.createElement('div');
+        row.className = 'cal-row' + (isToday ? ' today' : '');
+        row.innerHTML = `
+          <div>
+            <div class="day-name">${DAY_KO[d.getDay()]}${isToday ? '<span class="today-dot"></span>' : ''}</div>
+            <div class="day-date">${toKoDate(dateStr)}</div>
+          </div>
+          <div class="range">${dailyRanges[i]}</div>
+          <div class="check-wrap">
+            <button class="check-btn" aria-label="${DAY_KO[d.getDay()]} 읽기 완료">
+              <i class="ti ti-check" aria-hidden="true"></i>
+            </button>
+          </div>
+        `;
+        row.addEventListener('click', () => { checked[i] = !checked[i]; save(); render(); });
+        cal.appendChild(row);
+      });
+
+      render();
+    }
+
+    async function loadParsha() {
+      try {
+        const weekDates = getWeekDates();
+        const shabbatDate = weekDates[6]; // 토요일
+
+        // Shabbat API 사용 (매주 자동으로 이번 주 포션 반환)
+        // geonameid=1835848 = 서울 (위치는 포션 계산에 영향 없음)
+        const url = `https://www.hebcal.com/shabbat?cfg=json&geonameid=1835848&M=on&lg=s&leyning=on`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        console.log('Hebcal 응답:', data); // 디버깅용
+
+        // parashat 항목 찾기
+        const item = data.items?.find(it => it.category === 'parashat');
+        if (!item) throw new Error('포션 정보 없음 — items: ' + JSON.stringify(data.items?.map(i=>i.category)));
+
+        const parshaEn     = item.title || '';
+        const parshaTitle  = parshaKo(parshaEn);   // 한국어 이름으로 변환
+        const parshaHebrew = item.hebrew || '';
+        const leyning      = item.leyning || {};
+        const fullRange    = leyning.torah || '';
+
+        // 알리야 1~6 추출
+        const aliyot = [];
+        for (let i = 1; i <= 6; i++) {
+          if (leyning[String(i)]) aliyot.push(leyning[String(i)]);
+        }
+
+        renderPage(parshaTitle, parshaHebrew, shabbatDate, fullRange, aliyot, weekDates);
+
+      } catch (e) {
+        console.error('오류:', e);
+        document.getElementById('app').innerHTML = `
+          <div class="error-box">
+            포션 정보를 불러오지 못했어요.<br>
+            인터넷 연결을 확인하고 새로고침 해주세요.<br><br>
+            <small style="color:var(--text-tertiary)">${e.message}</small>
+          </div>
+        `;
+      }
+    }
+
+    loadParsha();
   </script>
 </body>
 </html>
