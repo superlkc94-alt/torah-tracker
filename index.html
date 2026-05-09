@@ -56,6 +56,32 @@
 
     .container { width: 100%; max-width: 680px; }
 
+    /* 상단 네비 */
+    .top-nav {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1.5rem;
+    }
+
+    .calendar-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-info);
+      text-decoration: none;
+      padding: 6px 12px;
+      border: 0.5px solid var(--border-tertiary);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      transition: all 0.15s;
+    }
+
+    .calendar-btn:hover {
+      border-color: var(--text-info);
+      background: var(--bg-info);
+    }
+
     .loading {
       display: flex;
       flex-direction: column;
@@ -275,11 +301,22 @@
   </style>
 </head>
 <body>
-  <div class="container" id="app">
-    <div class="loading">
-      <div class="loading-spinner"></div>
-      <span>포션 정보 불러오는 중...</span>
+  <div class="container">
+
+    <div class="top-nav">
+      <a href="calendar.html" class="calendar-btn">
+        <i class="ti ti-calendar"></i>
+        전체 캘린더 보기
+      </a>
     </div>
+
+    <div id="app">
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <span>포션 정보 불러오는 중...</span>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -291,7 +328,6 @@
       'Numbers':'민수기','Deuteronomy':'신명기'
     };
 
-    // 토라 포션 54개 한국어 이름 매핑
     const PARSHA_KO = {
       'Bereshit':'베레쉬트','Noach':'노아흐','Lech-Lecha':'레흐-레하',
       'Vayeira':'바예라','Chayei Sara':'하예이 사라','Toldot':'톨도트',
@@ -306,19 +342,18 @@
       'Achrei Mot':'아하레이 모트','Kedoshim':'케도쉼','Achrei Mot-Kedoshim':'아하레이 모트-케도쉼',
       'Emor':'에모르','Behar':'베하르','Bechukotai':'베추코타이',
       'Behar-Bechukotai':'베하르-베추코타이',
-      'Bamidbar':'바미드바르','Nasso':'나소','Beha\'alotcha':'베하알로트하',
-      'Sh\'lach':'쉘라흐','Korach':'코라흐','Chukat':'후카트',
+      'Bamidbar':'바미드바르','Nasso':'나소',"Beha'alotcha":'베하알로트하',
+      "Sh'lach":'쉘라흐','Korach':'코라흐','Chukat':'후카트',
       'Balak':'발락','Chukat-Balak':'후카트-발락','Pinchas':'핀하스',
       'Matot':'마토트','Masei':'마세이','Matot-Masei':'마토트-마세이',
       'Devarim':'데바림','Vaetchanan':'바에트하난','Eikev':'에케브',
-      'Re\'eh':'레에','Shoftim':'쇼프팀','Ki Teitzei':'키 테체이',
+      "Re'eh":'레에','Shoftim':'쇼프팀','Ki Teitzei':'키 테체이',
       'Ki Tavo':'키 타보','Nitzavim':'니차빔','Vayeilech':'바옐레흐',
-      'Nitzavim-Vayeilech':'니차빔-바옐레흐','Ha\'azinu':'하아지누',
+      'Nitzavim-Vayeilech':'니차빔-바옐레흐',"Ha'azinu":'하아지누',
       'Vezot Haberakhah':'베조트 하베라하'
     };
 
     function parshaKo(enTitle) {
-      // "Parashat Behar-Bechukotai" → "Behar-Bechukotai" 추출
       const name = enTitle.replace(/^Parashat\s+/i, '').trim();
       return PARSHA_KO[name] || name;
     }
@@ -343,10 +378,9 @@
       return `${MONTH_KO[m-1]} ${d}일`;
     }
 
-    // 이번 주 일요일~토요일 날짜 배열 반환
     function getWeekDates() {
       const now = new Date();
-      const day = now.getDay(); // 0=일요일
+      const day = now.getDay();
       const sunday = new Date(now);
       sunday.setDate(now.getDate() - day);
       const dates = [];
@@ -355,7 +389,7 @@
         d.setDate(sunday.getDate() + i);
         dates.push(toISO(d));
       }
-      return dates; // [일,월,화,수,목,금,토]
+      return dates;
     }
 
     function storageKey(name) {
@@ -368,7 +402,6 @@
       const saved = localStorage.getItem(key);
       const checked = saved ? JSON.parse(saved) : new Array(7).fill(false);
 
-      // 알리야 7개를 일별로 배분 (토요일은 항상 '전체 낭독')
       const dailyRanges = [];
       for (let i = 0; i < 6; i++) {
         dailyRanges.push(aliyot[i] ? bookKo(aliyot[i]) : bookKo(fullRange));
@@ -467,28 +500,22 @@
     async function loadParsha() {
       try {
         const weekDates = getWeekDates();
-        const shabbatDate = weekDates[6]; // 토요일
+        const shabbatDate = weekDates[6];
 
-        // Shabbat API 사용 (매주 자동으로 이번 주 포션 반환)
-        // geonameid=1835848 = 서울 (위치는 포션 계산에 영향 없음)
         const url = `https://www.hebcal.com/shabbat?cfg=json&geonameid=1835848&M=on&lg=s&leyning=on`;
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        console.log('Hebcal 응답:', data); // 디버깅용
-
-        // parashat 항목 찾기
         const item = data.items?.find(it => it.category === 'parashat');
-        if (!item) throw new Error('포션 정보 없음 — items: ' + JSON.stringify(data.items?.map(i=>i.category)));
+        if (!item) throw new Error('포션 정보 없음');
 
         const parshaEn     = item.title || '';
-        const parshaTitle  = parshaKo(parshaEn);   // 한국어 이름으로 변환
+        const parshaTitle  = parshaKo(parshaEn);
         const parshaHebrew = item.hebrew || '';
         const leyning      = item.leyning || {};
         const fullRange    = leyning.torah || '';
 
-        // 알리야 1~6 추출
         const aliyot = [];
         for (let i = 1; i <= 6; i++) {
           if (leyning[String(i)]) aliyot.push(leyning[String(i)]);

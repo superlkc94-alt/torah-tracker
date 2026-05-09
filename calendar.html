@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>토라 포션 캘린더</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg2: #f5f5f3;
+      --bg-info: #e6f1fb;
+      --text: #1a1a18;
+      --text2: #5f5e5a;
+      --text3: #c0bebb;
+      --text-info: #185fa5;
+      --text-sun: #d93636;
+      --text-sat: #1a5fc8;
+      --border: rgba(0,0,0,0.09);
+      --r: 14px;
+      --bar: #d1d1cf;
+      --bar-text: #3a3a38;
+      --bar-current: #e8534a;
+      --bar-current-text: #fff;
+      --bar-special: #e8e0f5;
+      --bar-special-text: #6b4fa0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1e1e1c; --bg2: #2a2a27; --bg-info: #0c447c;
+        --text: #f0ede6; --text2: #b4b2a9; --text3: #555;
+        --text-info: #85b7eb; --text-sun: #f07070; --text-sat: #6fa8f0;
+        --border: rgba(255,255,255,0.07);
+        --bar: #3a3a38; --bar-text: #d0cdc6;
+        --bar-current: #c0392b; --bar-current-text: #fff;
+        --bar-special: #2d1f4a; --bar-special-text: #b89fe0;
+      }
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg2);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .wrap { max-width: 980px; margin: 0 auto; }
+
+    /* 네비 */
+    .top-nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; }
+
+    .back-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:13px; color:var(--text-info); text-decoration:none;
+      padding:6px 12px; border:0.5px solid var(--border);
+      border-radius:8px; background:var(--bg); transition:all .15s;
+    }
+    .back-btn:hover { border-color:var(--text-info); background:var(--bg-info); }
+
+    /* 월 헤더 */
+    .month-hd { display:flex; align-items:center; gap:14px; margin-bottom:1.25rem; }
+    .month-title { font-size:30px; font-weight:500; line-height:1; }
+
+    .nav-btn {
+      width:32px; height:32px; border-radius:50%;
+      border:0.5px solid var(--border); background:var(--bg);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; color:var(--text2); transition:all .15s; flex-shrink:0;
+    }
+    .nav-btn:hover { border-color:var(--text-info); color:var(--text-info); }
+
+    /* 달력 */
+    .cal {
+      background:var(--bg); border:0.5px solid var(--border);
+      border-radius:var(--r); overflow:hidden;
+    }
+
+    /* 요일 헤더 */
+    .dow-row { display:grid; grid-template-columns:repeat(7,1fr); border-bottom:0.5px solid var(--border); }
+    .dow-cell { padding:9px 0; text-align:center; font-size:12px; font-weight:500; color:var(--text3); }
+    .dow-cell.sun { color:var(--text-sun); }
+    .dow-cell.sat { color:var(--text-sat); }
+
+    /* 주 행 */
+    .week-row {
+      display:grid; grid-template-columns:repeat(7,1fr);
+      position:relative;
+      border-bottom:0.5px solid var(--border);
+    }
+    .week-row:last-child { border-bottom:none; }
+
+    /* 날짜 셀 */
+    .dc {
+      min-height:78px; padding:7px 8px 4px;
+      border-right:0.5px solid var(--border);
+    }
+    .dc:last-child { border-right:none; }
+
+    .dn { font-size:13px; color:var(--text); line-height:1; }
+    .dc.other .dn { color:var(--text3); }
+
+    .dc.sun-col:not(.other) .dn { color:var(--text-sun); }
+    .dc.sat-col:not(.other) .dn { color:var(--text-sat); }
+
+    /* 오늘 */
+    .dc.today .dn {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:22px; height:22px; background:var(--text-info);
+      color:#fff; border-radius:50%; font-size:12px;
+    }
+
+    /* ── 포션 바 오버레이 ── */
+    /*
+      토라포션은 토요일(샤밧)에 낭독 시작.
+      바는 그 주 토요일(col 6)부터 다음 주 금요일(col 5)까지.
+      달력은 일~토 7열이므로:
+        - 토요일 시작 → 같은 행의 col 6(토)만 해당 행에서 채움
+        - 다음 행(일~금, col 0~5)에 이어서 채움
+        - 이후 포션이 다시 시작될 때까지 반복
+    */
+
+    /* 바는 position:absolute로 week-row 위에 오버레이 */
+    .bar-overlay {
+      position:absolute;
+      top:30px;
+      height:22px;
+      pointer-events:none;
+      z-index:1;
+      padding: 0 3px; /* 좌우 여백으로 바 사이 자연스러운 구분 */
+    }
+
+    .bar-link {
+      display:block; height:22px; line-height:22px;
+      font-size:11px; font-weight:500;
+      padding:0 8px; border-radius:4px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      background:var(--bar); color:var(--bar-text);
+      text-decoration:none; pointer-events:all; cursor:pointer;
+      transition:opacity .15s;
+    }
+    .bar-link:hover { opacity:.8; }
+    .bar-link.current { background:var(--bar-current); color:var(--bar-current-text); }
+    .bar-link.special {
+      background:var(--bar-special); color:var(--bar-special-text);
+      font-style:italic; letter-spacing:0.01em;
+    }
+
+    /* 금→토 구분: 바 오버레이에 좌우 여백으로 자연스럽게 구분 */
+    .dc.sat-col {
+      padding-left: 6px;
+    }
+
+    /* 로딩 */
+    .loading { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4rem 0; gap:12px; color:var(--text3); font-size:14px; }
+    .sp { width:24px; height:24px; border:2px solid var(--border); border-top-color:var(--text-info); border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    .err { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--r); padding:1.5rem; text-align:center; color:var(--text2); font-size:14px; line-height:1.7; }
+
+    .footer { text-align:center; font-size:12px; color:var(--text3); padding-top:1.5rem; }
+    .footer a { color:var(--text-info); text-decoration:none; }
+
+    @media(max-width:600px) {
+      .month-title { font-size:20px; }
+      .dc { min-height:56px; padding:5px 3px 2px; }
+      .dn { font-size:11px; }
+      .bar-link { font-size:9px; height:18px; line-height:18px; padding:0 3px; }
+      .bar-overlay { top:24px; height:18px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top-nav">
+    <a href="index.html" class="back-btn"><i class="ti ti-arrow-left"></i> 이번 주로 돌아가기</a>
+  </div>
+
+  <div class="month-hd">
+    <button class="nav-btn" onclick="changeMonth(-1)"><i class="ti ti-chevron-left"></i></button>
+    <div class="month-title" id="mtitle">...</div>
+    <button class="nav-btn" onclick="changeMonth(1)"><i class="ti ti-chevron-right"></i></button>
+  </div>
+
+  <div id="cal" class="cal">
+    <div class="loading"><div class="sp"></div><span>불러오는 중...</span></div>
+  </div>
+
+  <div class="footer">포션 일정: <a href="https://www.hebcal.com/sedrot/" target="_blank">Hebcal Jewish Calendar</a></div>
+
+</div>
+<script>
+  const MKO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+
+  const PKO = {
+    'Bereshit':'베레쉬트','Noach':'노아흐','Lech-Lecha':'레흐-레하',
+    'Vayeira':'바예라','Chayei Sara':'하예이 사라','Toldot':'톨도트',
+    'Vayetzei':'바예체이','Vayishlach':'바이슐라흐','Vayeshev':'바예쉐브',
+    'Miketz':'미케츠','Vayigash':'바이가쉬','Vayechi':'바예히',
+    'Shemot':'쉐모트','Vaeira':'바에라','Bo':'보',
+    'Beshalach':'베샬라흐','Yitro':'이트로','Mishpatim':'미쉬파팀',
+    'Terumah':'테루마','Tetzaveh':'테차베','Ki Tisa':'키 티사',
+    'Vayakhel':'바야크헬','Pekudei':'페쿠데이','Vayakhel-Pekudei':'바야크헬-페쿠데이',
+    'Vayikra':'바이크라','Tzav':'차브','Shmini':'쉬미니',
+    'Tazria':'타즈리아','Metzora':'메초라','Tazria-Metzora':'타즈리아-메초라',
+    'Achrei Mot':'아하레이 모트','Kedoshim':'케도쉼','Achrei Mot-Kedoshim':'아하레이 모트-케도쉼',
+    'Emor':'에모르','Behar':'베하르','Bechukotai':'베추코타이',
+    'Behar-Bechukotai':'베하르-베추코타이',
+    'Bamidbar':'바미드바르','Nasso':'나소',"Beha'alotcha":'베하알로트하',
+    "Sh'lach":'쉘라흐','Korach':'코라흐','Chukat':'후카트',
+    'Balak':'발락','Chukat-Balak':'후카트-발락','Pinchas':'핀하스',
+    'Matot':'마토트','Masei':'마세이','Matot-Masei':'마토트-마세이',
+    'Devarim':'데바림','Vaetchanan':'바에트하난','Eikev':'에케브',
+    "Re'eh":'레에','Shoftim':'쇼프팀','Ki Teitzei':'키 테체이',
+    'Ki Tavo':'키 타보','Nitzavim':'니차빔','Vayeilech':'바옐레흐',
+    'Nitzavim-Vayeilech':'니차빔-바옐레흐',"Ha'azinu":'하아지누',
+    'Vezot Haberakhah':'베조트 하베라하'
+  };
+
+  function pKo(t) { const n=t.replace(/^Parashat\s+/i,'').trim(); return PKO[n]||n; }
+
+  function toISO(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function addDays(d, n) { const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+
+  function getThisShabbat() {
+    const now=new Date();
+    const diff=now.getDay()===6?0:6-now.getDay();
+    return toISO(addDays(now,diff));
+  }
+
+  // 해당 월 + 앞뒤 여유 포함해서 포션 + 명절 fetch
+  async function fetchParshas(year, month) {
+    const start = toISO(new Date(year, month-1, -6));
+    const end   = toISO(new Date(year, month, 14));
+    // maj=on 으로 명절도 같이 가져옴
+    const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=on&min=off&mod=off&nx=off&mf=off&ss=off&c=off&geo=none&start=${start}&end=${end}&i=off`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    const parshaMap  = {}; // shabbatISO → parshaName
+    const holidaySet = new Set(); // 명절이 있는 토요일 ISO
+
+    (data.items||[]).forEach(it=>{
+      const d = it.date?.split('T')[0];
+      if(!d) return;
+      if(it.category==='parashat') parshaMap[d] = pKo(it.title);
+      // 명절(holiday)이 토요일인 경우 수집
+      if(it.category==='holiday'){
+        const date = new Date(d+'T00:00:00');
+        if(date.getDay()===6) holidaySet.add(d);
+      }
+    });
+
+    // 포션이 없는 토요일 중 명절 주간 → '특별 낭독 주간' 으로 마킹
+    // 날짜 범위 내 모든 토요일 순회
+    const startD = new Date(start+'T00:00:00');
+    const endD   = new Date(end+'T00:00:00');
+    for(let d=new Date(startD); d<=endD; d.setDate(d.getDate()+1)){
+      if(d.getDay()===6){
+        const iso = toISO(d);
+        if(!parshaMap[iso]){
+          // 이 토요일 ±3일 내에 명절이 있으면 특별 낭독 주간
+          let hasHoliday = false;
+          for(let h of holidaySet){
+            const diff = Math.abs(new Date(h+'T00:00:00') - new Date(iso+'T00:00:00'));
+            if(diff <= 3*24*60*60*1000){ hasHoliday=true; break; }
+          }
+          if(hasHoliday) parshaMap[iso] = '__special__';
+        }
+      }
+    }
+
+    return parshaMap;
+  }
+
+  const todayISO    = toISO(new Date());
+  const thisShabbat = getThisShabbat();
+  let Y = new Date().getFullYear();
+  let M = new Date().getMonth()+1;
+
+  async function render() {
+    document.getElementById('mtitle').textContent = `${MKO[M-1]} | ${Y}`;
+    const cal = document.getElementById('cal');
+    cal.innerHTML = `<div class="loading"><div class="sp"></div><span>불러오는 중...</span></div>`;
+
+    let pm={};
+    try { pm = await fetchParshas(Y,M); }
+    catch(e){ cal.innerHTML=`<div class="err">포션 정보를 불러오지 못했어요.<br><small>${e.message}</small></div>`; return; }
+
+    // ── 날짜 셀 구성 (일요일 시작)
+    const first = new Date(Y,M-1,1);
+    const last  = new Date(Y,M,0);
+    const startDow = first.getDay(); // 0=일
+    const cells = [];
+
+    // 이전달 채우기
+    for(let i=startDow-1;i>=0;i--){
+      const d=addDays(first,-i-1);
+      cells.push({d,iso:toISO(d),cur:false,other:true,dow:d.getDay()});
+    }
+    // 이번달
+    for(let n=1;n<=last.getDate();n++){
+      const d=new Date(Y,M-1,n);
+      cells.push({d,iso:toISO(d),cur:d.getMonth()===M-1,other:false,dow:d.getDay()});
+    }
+    // 다음달
+    const rem=(7-cells.length%7)%7;
+    for(let i=1;i<=rem;i++){
+      const d=new Date(Y,M,i);
+      cells.push({d,iso:toISO(d),cur:false,other:true,dow:d.getDay()});
+    }
+
+    // ── 주 단위 분리
+    const weeks=[];
+    for(let i=0;i<cells.length;i+=7) weeks.push(cells.slice(i,i+7));
+
+    // ── 각 주에 표시할 포션 바 계산
+    // 포션 바는 "토요일(샤밧)"에서 시작해서 다음 "금요일"에서 끝남
+    // 한 주 행(일~토)에서 포션은 두 가지 경우:
+    //   A. 이 주 토요일의 포션 → 토요일 셀(col6) 1칸
+    //   B. 지난 주 토요일의 포션 (이번 주 일~금) → col0~5
+
+    // 각 주별로 bars 배열 계산
+    // bar = { startCol, endCol, name, shabbatISO, isCurrent }
+
+    // shabbatISO → parshaName 맵(pm) 이용
+    // 각 셀의 ISO를 보며 토요일이면 포션 시작, 금요일이면 포션 끝
+
+    // 접근: 각 주마다 두 구간 계산
+    // 구간1: 일(0)~금(5) → 이 구간에 해당하는 샤밧 = 이 주 토요일 - 7일 = 지난주 토요일
+    // 구간2: 토(6) → 이 주 토요일
+
+    function getBarForWeek(week) {
+      const bars = [];
+
+      // 구간1: 일~금 (col 0~5) → 지난주 토요일 포션
+      const sunCell = week[0];
+      const lastSat = toISO(addDays(sunCell.d, -1)); // 이 주 일요일 - 1 = 지난주 토요일
+      if(pm[lastSat]){
+        // col 0부터 5까지 중 이번달 셀만 채움 (other 제외)
+        // 단, other 셀이 있어도 바는 해당 col까지만 (other면 바 없음)
+        let startCol=0, endCol=5;
+        // 앞쪽 other 셀은 바 제외
+        while(startCol<=5 && week[startCol].other) startCol++;
+        // 뒤쪽 other 셀도 바 제외
+        while(endCol>=startCol && week[endCol].other) endCol--;
+        if(startCol<=endCol){
+          bars.push({
+            startCol, endCol,
+            name: pm[lastSat],
+            shabbatISO: lastSat,
+            isCurrent: lastSat===thisShabbat
+          });
+        }
+      }
+
+      // 구간2: 토(col 6) → 이 주 토요일 포션
+      const satCell = week[6];
+      if(!satCell.other && pm[satCell.iso]){
+        bars.push({
+          startCol:6, endCol:6,
+          name: pm[satCell.iso],
+          shabbatISO: satCell.iso,
+          isCurrent: satCell.iso===thisShabbat
+        });
+      }
+
+      return bars;
+    }
+
+    // ── HTML 생성
+    let html = `<div class="dow-row">`;
+    ['일','월','화','수','목','금','토'].forEach((d,i)=>{
+      html+=`<div class="dow-cell ${i===0?'sun':i===6?'sat':''}">${d}</div>`;
+    });
+    html+=`</div>`;
+
+    weeks.forEach(week=>{
+      html+=`<div class="week-row">`;
+
+      // 날짜 셀
+      week.forEach(cell=>{
+        const sc = cell.dow===0?'sun-col':cell.dow===6?'sat-col':'';
+        const tc = cell.iso===todayISO?'today':'';
+        const oc = cell.other?'other':'';
+        html+=`<div class="dc ${sc} ${tc} ${oc}"><div class="dn">${cell.d.getDate()}</div></div>`;
+      });
+
+      // 포션 바 오버레이
+      const bars = getBarForWeek(week);
+      bars.forEach(bar=>{
+        const left  = (bar.startCol/7*100).toFixed(3);
+        const right = ((6-bar.endCol)/7*100).toFixed(3);
+        const isSpecial = bar.name === '__special__';
+        const displayName = isSpecial ? '✦ 특별 낭독 주간' : bar.name;
+        const cls = isSpecial ? 'bar-link special'
+                  : bar.isCurrent ? 'bar-link current' : 'bar-link';
+        const href = isSpecial ? '' : `href="index.html?shabbat=${bar.shabbatISO}"`;
+        const tag  = isSpecial ? 'span' : 'a';
+        html+=`<div class="bar-overlay" style="left:${left}%;right:${right}%;">
+          <${tag} class="${cls}" ${href} title="${displayName}">${displayName}</${tag}>
+        </div>`;
+      });
+
+      html+=`</div>`;
+    });
+
+    cal.innerHTML=html;
+  }
+
+  function changeMonth(d){
+    M+=d;
+    if(M>12){M=1;Y++;}
+    if(M<1){M=12;Y--;}
+    render();
+  }
+
+  render();
+</script>
+</body>
+</html>
