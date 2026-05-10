@@ -108,12 +108,14 @@
     .dc.sun-col:not(.other) .dn { color:var(--text-sun); }
     .dc.sat-col:not(.other) .dn { color:var(--text-sat); }
 
-    /* 오늘 */
-    .dc.today .dn {
-      display:inline-flex; align-items:center; justify-content:center;
-      width:22px; height:22px; background:var(--text-info);
-      color:#fff; border-radius:50%; font-size:12px;
+    /* 오늘 — 셀 테두리 강조 */
+    .dc.today {
+      outline: 1px solid #4F4F4F;
+      outline-offset: -1px;
+      position: relative;
+      z-index: 2;
     }
+    .dc.today .dn { color: #4F4F4F; font-weight: 500; }
 
     /* ── 포션 바 오버레이 ── */
     /*
@@ -131,8 +133,8 @@
       top:30px;
       height:22px;
       pointer-events:none;
-      z-index:1;
-      padding: 0 3px; /* 좌우 여백으로 바 사이 자연스러운 구분 */
+      z-index:3;
+      padding: 0 3px;
     }
 
     .bar-link {
@@ -210,8 +212,8 @@
     'Vayikra':'바이크라','Tzav':'차브','Shmini':'쉬미니',
     'Tazria':'타즈리아','Metzora':'메초라','Tazria-Metzora':'타즈리아-메초라',
     'Achrei Mot':'아하레이 모트','Kedoshim':'케도쉼','Achrei Mot-Kedoshim':'아하레이 모트-케도쉼',
-    'Emor':'에모르','Behar':'베하르','Bechukotai':'베추코타이',
-    'Behar-Bechukotai':'베하르-베추코타이',
+    'Emor':'에모르','Behar':'베하르','Bechukotai':'베후코타이',
+    'Behar-Bechukotai':'베하르-베후코타이',
     'Bamidbar':'바미드바르','Nasso':'나소',"Beha'alotcha":'베하알로트하',
     "Sh'lach":'쉘라흐','Korach':'코라흐','Chukat':'후카트',
     'Balak':'발락','Chukat-Balak':'후카트-발락','Pinchas':'핀하스',
@@ -225,6 +227,31 @@
 
   function pKo(t) { const n=t.replace(/^Parashat\s+/i,'').trim(); return PKO[n]||n; }
 
+  // 토라 포션 전체 고정 주차 (1~54번째 포션 순서)
+  // 합쳐진 포션(더블 파샤)은 단독 포션과 같은 번호 부여
+  const PARSHA_WEEK_NUM = {
+    'Bereshit':1,'Noach':2,'Lech-Lecha':3,'Vayeira':4,'Chayei Sara':5,
+    'Toldot':6,'Vayetzei':7,'Vayishlach':8,'Vayeshev':9,'Miketz':10,
+    'Vayigash':11,'Vayechi':12,'Shemot':13,'Vaeira':14,'Bo':15,
+    'Beshalach':16,'Yitro':17,'Mishpatim':18,'Terumah':19,'Tetzaveh':20,
+    'Ki Tisa':21,'Vayakhel':22,'Pekudei':23,'Vayakhel-Pekudei':'22-23',
+    'Vayikra':24,'Tzav':25,'Shmini':26,'Tazria':27,'Metzora':28,
+    'Tazria-Metzora':'27-28','Achrei Mot':29,'Kedoshim':30,
+    'Achrei Mot-Kedoshim':'29-30','Emor':31,'Behar':32,'Bechukotai':33,
+    'Behar-Bechukotai':'32-33','Bamidbar':34,'Nasso':35,"Beha'alotcha":36,
+    "Sh'lach":37,'Korach':38,'Chukat':39,'Balak':40,'Chukat-Balak':'39-40',
+    'Pinchas':41,'Matot':42,'Masei':43,'Matot-Masei':'42-43',
+    'Devarim':44,'Vaetchanan':45,'Eikev':46,"Re'eh":47,'Shoftim':48,
+    'Ki Teitzei':49,'Ki Tavo':50,'Nitzavim':51,'Vayeilech':52,
+    'Nitzavim-Vayeilech':'51-52',"Ha'azinu":53,'Vezot Haberakhah':54
+  };
+
+  function getParshaWeekNum(enTitle) {
+    const name = enTitle.replace(/^Parashat\s+/i,'').trim();
+    const num = PARSHA_WEEK_NUM[name];
+    return num !== undefined ? num : null;
+  }
+
   function toISO(d) {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
@@ -232,9 +259,13 @@
   function addDays(d, n) { const r=new Date(d); r.setDate(r.getDate()+n); return r; }
 
   function getThisShabbat() {
-    const now=new Date();
-    const diff=now.getDay()===6?0:6-now.getDay();
-    return toISO(addDays(now,diff));
+    const now = new Date();
+    const dow = now.getDay(); // 0=일, 1=월 ... 6=토
+    // 포션은 토요일 시작 → 다음 금요일 끝
+    // 오늘이 토요일이면 오늘이 새 포션 시작일
+    // 오늘이 일~금이면 지난주 토요일이 현재 포션의 샤밧
+    const diff = dow === 6 ? 0 : -(dow + 1);
+    return toISO(addDays(now, diff));
   }
 
   // 해당 월 + 앞뒤 여유 포함해서 포션 + 명절 fetch
@@ -247,14 +278,18 @@
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
-    const parshaMap  = {}; // shabbatISO → parshaName
-    const holidaySet = new Set(); // 명절이 있는 토요일 ISO
+    const parshaMap  = {};
+    const holidaySet = new Set();
 
     (data.items||[]).forEach(it=>{
       const d = it.date?.split('T')[0];
       if(!d) return;
-      if(it.category==='parashat') parshaMap[d] = pKo(it.title);
-      // 명절(holiday)이 토요일인 경우 수집
+      if(it.category==='parashat'){
+        const enName = it.title.replace(/^Parashat\s+/i,'').trim();
+        const koName = pKo(it.title);
+        const weekNum = getParshaWeekNum(it.title);
+        parshaMap[d] = { name: koName, weekNum };
+      }
       if(it.category==='holiday'){
         const date = new Date(d+'T00:00:00');
         if(date.getDay()===6) holidaySet.add(d);
@@ -269,13 +304,12 @@
       if(d.getDay()===6){
         const iso = toISO(d);
         if(!parshaMap[iso]){
-          // 이 토요일 ±3일 내에 명절이 있으면 특별 낭독 주간
           let hasHoliday = false;
           for(let h of holidaySet){
             const diff = Math.abs(new Date(h+'T00:00:00') - new Date(iso+'T00:00:00'));
             if(diff <= 3*24*60*60*1000){ hasHoliday=true; break; }
           }
-          if(hasHoliday) parshaMap[iso] = '__special__';
+          if(hasHoliday) parshaMap[iso] = { name: '__special__', weekNum: null };
         }
       }
     }
@@ -300,64 +334,41 @@
     // ── 날짜 셀 구성 (일요일 시작)
     const first = new Date(Y,M-1,1);
     const last  = new Date(Y,M,0);
-    const startDow = first.getDay(); // 0=일
+    const startDow = first.getDay();
     const cells = [];
 
-    // 이전달 채우기
     for(let i=startDow-1;i>=0;i--){
       const d=addDays(first,-i-1);
       cells.push({d,iso:toISO(d),cur:false,other:true,dow:d.getDay()});
     }
-    // 이번달
     for(let n=1;n<=last.getDate();n++){
       const d=new Date(Y,M-1,n);
       cells.push({d,iso:toISO(d),cur:d.getMonth()===M-1,other:false,dow:d.getDay()});
     }
-    // 다음달
     const rem=(7-cells.length%7)%7;
     for(let i=1;i<=rem;i++){
       const d=new Date(Y,M,i);
       cells.push({d,iso:toISO(d),cur:false,other:true,dow:d.getDay()});
     }
 
-    // ── 주 단위 분리
     const weeks=[];
     for(let i=0;i<cells.length;i+=7) weeks.push(cells.slice(i,i+7));
-
-    // ── 각 주에 표시할 포션 바 계산
-    // 포션 바는 "토요일(샤밧)"에서 시작해서 다음 "금요일"에서 끝남
-    // 한 주 행(일~토)에서 포션은 두 가지 경우:
-    //   A. 이 주 토요일의 포션 → 토요일 셀(col6) 1칸
-    //   B. 지난 주 토요일의 포션 (이번 주 일~금) → col0~5
-
-    // 각 주별로 bars 배열 계산
-    // bar = { startCol, endCol, name, shabbatISO, isCurrent }
-
-    // shabbatISO → parshaName 맵(pm) 이용
-    // 각 셀의 ISO를 보며 토요일이면 포션 시작, 금요일이면 포션 끝
-
-    // 접근: 각 주마다 두 구간 계산
-    // 구간1: 일(0)~금(5) → 이 구간에 해당하는 샤밧 = 이 주 토요일 - 7일 = 지난주 토요일
-    // 구간2: 토(6) → 이 주 토요일
 
     function getBarForWeek(week) {
       const bars = [];
 
       // 구간1: 일~금 (col 0~5) → 지난주 토요일 포션
       const sunCell = week[0];
-      const lastSat = toISO(addDays(sunCell.d, -1)); // 이 주 일요일 - 1 = 지난주 토요일
+      const lastSat = toISO(addDays(sunCell.d, -1));
       if(pm[lastSat]){
-        // col 0부터 5까지 중 이번달 셀만 채움 (other 제외)
-        // 단, other 셀이 있어도 바는 해당 col까지만 (other면 바 없음)
         let startCol=0, endCol=5;
-        // 앞쪽 other 셀은 바 제외
         while(startCol<=5 && week[startCol].other) startCol++;
-        // 뒤쪽 other 셀도 바 제외
         while(endCol>=startCol && week[endCol].other) endCol--;
         if(startCol<=endCol){
           bars.push({
             startCol, endCol,
-            name: pm[lastSat],
+            name: pm[lastSat].name,
+            weekNum: pm[lastSat].weekNum,
             shabbatISO: lastSat,
             isCurrent: lastSat===thisShabbat
           });
@@ -369,7 +380,8 @@
       if(!satCell.other && pm[satCell.iso]){
         bars.push({
           startCol:6, endCol:6,
-          name: pm[satCell.iso],
+          name: pm[satCell.iso].name,
+          weekNum: pm[satCell.iso].weekNum,
           shabbatISO: satCell.iso,
           isCurrent: satCell.iso===thisShabbat
         });
@@ -402,7 +414,8 @@
         const left  = (bar.startCol/7*100).toFixed(3);
         const right = ((6-bar.endCol)/7*100).toFixed(3);
         const isSpecial = bar.name === '__special__';
-        const displayName = isSpecial ? '✦ 특별 낭독 주간' : bar.name;
+        const weekPrefix = (!isSpecial && bar.weekNum) ? `${bar.weekNum}주차 ` : '';
+        const displayName = isSpecial ? '✦ 특별 낭독 주간' : `${weekPrefix}${bar.name}`;
         const cls = isSpecial ? 'bar-link special'
                   : bar.isCurrent ? 'bar-link current' : 'bar-link';
         const href = isSpecial ? '' : `href="index.html?shabbat=${bar.shabbatISO}"`;
