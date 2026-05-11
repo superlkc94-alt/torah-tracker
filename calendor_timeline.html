@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>토라 포션 타임라인</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f6f2;
+      --bg-card: #ffffff;
+      --bg-current: #fff8ed;
+      --bg-special: #f3f0fb;
+      --text: #1c1a16;
+      --text2: #6b6760;
+      --text3: #b0ada6;
+      --text-info: #1a5fa8;
+      --text-current: #b45309;
+      --text-special: #6b4fa0;
+      --accent: #e8534a;
+      --accent-soft: #fde8e7;
+      --border: rgba(0,0,0,0.08);
+      --border-current: #f0c070;
+      --line: rgba(0,0,0,0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141412;
+        --bg-card: #1e1d1a;
+        --bg-current: #2a2010;
+        --bg-special: #1a1528;
+        --text: #f0ede6;
+        --text2: #a8a49c;
+        --text3: #555;
+        --text-info: #7ab3e8;
+        --text-current: #f0a840;
+        --text-special: #b89fe0;
+        --accent: #e8534a;
+        --accent-soft: #3a1a18;
+        --border: rgba(255,255,255,0.07);
+        --border-current: #92600a;
+        --line: rgba(255,255,255,0.08);
+      }
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* 전체 최대 너비 컨테이너 */
+    .page-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+      .page-inner { padding: 0 0.75rem; }
+    }
+
+    /* ── 상단 헤더 ── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 0.5px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+
+    .header-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0.9rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      .header-inner { padding: 0.9rem 0.75rem; }
+    }
+
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--text-info); text-decoration: none;
+      padding: 6px 12px; border: 0.5px solid var(--border);
+      border-radius: var(--radius-sm); background: var(--bg-card);
+      transition: all .15s; white-space: nowrap;
+    }
+    .back-btn:hover { border-color: var(--text-info); }
+
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .year-btn {
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 0.5px solid var(--border); background: var(--bg-card);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text2); transition: all .15s;
+      flex-shrink: 0;
+    }
+    .year-btn:hover { border-color: var(--text-info); color: var(--text-info); }
+
+    .year-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      min-width: 140px;
+      text-align: center;
+    }
+
+    /* ── 현재 포션 요약 배너 ── */
+    .current-banner {
+      max-width: 760px;
+      margin: 1rem auto 0;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    .banner-inner {
+      background: var(--bg-current);
+      border: 1px solid var(--border-current);
+      border-radius: var(--radius);
+      padding: 0.9rem 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+      .current-banner { padding-left: 0.75rem; padding-right: 0.75rem; }
+    }
+
+    .current-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .current-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text-current);
+      text-transform: uppercase;
+    }
+
+    .current-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-current);
+      font-family: 'Noto Serif KR', serif;
+    }
+
+    .current-range {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 1px;
+    }
+
+    /* ── 월 그룹 ── */
+    .timeline {
+      padding: 0.75rem 1rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .month-group { margin-bottom: 0.75rem; }
+
+    .month-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #2a2a2a;
+      text-transform: none;
+      padding: 1.2rem 0 0.6rem;
+      position: sticky;
+      top: 57px;
+      background: var(--bg);
+      z-index: 10;
+    }
+
+    /* ── 포션 카드 ── */
+    .parsha-card {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin-bottom: 6px;
+      text-decoration: none;
+      color: inherit;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      transition: transform .15s, box-shadow .15s;
+      cursor: pointer;
+    }
+
+    .parsha-card:hover { transform: translateX(2px); }
+
+    /* 왼쪽 날짜 컬럼 */
+    .card-date {
+      width: 64px;
+      flex-shrink: 0;
+      padding: 14px 8px;
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      border-right: none;
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+    }
+
+    .date-month {
+      font-size: 10px;
+      font-weight: 600;
+      color: #888;
+      letter-spacing: 0.05em;
+    }
+
+    .date-day {
+      font-size: 22px;
+      font-weight: 700;
+      color: #3a3a3a;
+      line-height: 1;
+    }
+
+    .date-dow {
+      font-size: 10px;
+      color: #888;
+    }
+
+    /* 오른쪽 내용 컬럼 */
+    .card-body {
+      flex: 1;
+      padding: 12px 14px;
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      border-left: 3px solid transparent;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-week-num {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: #888;
+      margin-bottom: 3px;
+    }
+
+    /* 포션명 + 성경범위 가로 배치 */
+    .card-name-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #2a2a2a;
+      font-family: 'Noto Serif KR', serif;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+
+    .card-book {
+      font-size: 14px;
+      color: #252525;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    .card-arrow {
+      color: var(--text3);
+      flex-shrink: 0;
+      font-size: 16px;
+    }
+
+    /* 이번 주 카드 */
+    .parsha-card.current .card-date {
+      background: var(--bg-current);
+      border-color: var(--border-current);
+    }
+
+    .parsha-card.current .card-date .date-day {
+      color: var(--text-current);
+    }
+
+    .parsha-card.current .card-body {
+      background: var(--bg-current);
+      border-color: var(--border-current);
+      border-left-color: var(--accent);
+    }
+
+    .parsha-card.current .card-name {
+      color: var(--text-current);
+    }
+
+    .parsha-card.current .card-week-num {
+      color: var(--accent);
+    }
+
+    /* 지난 포션 흐리게 */
+    .parsha-card.past .card-date,
+    .parsha-card.past .card-body {
+      opacity: 0.45;
+    }
+
+    /* 특별 낭독 주간 */
+    .parsha-card.special .card-date {
+      background: var(--bg-card);
+      border-color: var(--border);
+    }
+
+    .parsha-card.special .card-body {
+      background: var(--bg-card);
+      border-color: var(--border);
+      border-left-color: transparent;
+    }
+
+    .parsha-card.special .card-name {
+      color: var(--text-special);
+      font-style: italic;
+    }
+
+    .parsha-card.special .card-week-num {
+      color: var(--text-special);
+    }
+
+    /* 지난 특별 낭독 주간도 흐리게 */
+    .parsha-card.special.past .card-date,
+    .parsha-card.special.past .card-body {
+      opacity: 0.45;
+    }
+
+    /* 로딩 */
+    .loading {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 5rem 0; gap: 12px;
+      color: var(--text3); font-size: 14px;
+    }
+
+    .sp {
+      width: 24px; height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--text-info);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .err {
+      margin: 2rem 1.25rem;
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem; text-align: center;
+      color: var(--text2); font-size: 14px; line-height: 1.7;
+    }
+
+    /* 푸터 */
+    .footer {
+      text-align: center; font-size: 12px;
+      color: var(--text3); padding: 2rem 0 3rem;
+    }
+    .footer a { color: var(--text-info); text-decoration: none; }
+
+    @media (max-width: 480px) {
+      .card-date { width: 56px; padding: 10px 6px; }
+      .date-day { font-size: 18px; }
+      .card-name { font-size: 15px; white-space: normal; }
+      .card-book { font-size: 12px; white-space: normal; }
+      .card-body { padding: 10px 10px; }
+      .card-name-row { flex-direction: column; gap: 3px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-inner">
+      <a href="index.html" class="back-btn">
+        <i class="ti ti-arrow-left"></i> 이번 주로
+      </a>
+      <div class="header-center">
+        <button class="year-btn" onclick="changeYear(-1)"><i class="ti ti-chevron-left"></i></button>
+        <div class="year-label" id="year-label">...</div>
+        <button class="year-btn" onclick="changeYear(1)"><i class="ti ti-chevron-right"></i></button>
+      </div>
+      <div style="width:80px"></div>
+    </div>
+  </div>
+
+  <div id="banner" style="display:none" class="current-banner">
+    <div class="banner-inner">
+      <div class="current-dot"></div>
+      <div>
+        <div class="current-label">이번 주 포션</div>
+        <div class="current-name" id="banner-name">—</div>
+        <div class="current-range" id="banner-range">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-inner">
+    <div id="app">
+      <div class="loading"><div class="sp"></div><span>포션 일정 불러오는 중...</span></div>
+    </div>
+    <div class="footer">
+      포션 일정: <a href="https://www.hebcal.com/sedrot/" target="_blank">Hebcal Jewish Calendar</a>
+    </div>
+  </div>
+
+<script>
+  const MKO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const MSHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const DOWKO = ['일','월','화','수','목','금','토'];
+
+  const BOOK_MAP = {
+    'Genesis':'창세기','Exodus':'출애굽기','Leviticus':'레위기',
+    'Numbers':'민수기','Deuteronomy':'신명기'
+  };
+
+  const PKO = {
+    'Bereshit':'베레쉬트','Noach':'노아흐','Lech-Lecha':'레흐-레하',
+    'Vayeira':'바예라','Chayei Sara':'하예 사라','Toldot':'톨도트',
+    'Vayetzei':'바예체이','Vayishlach':'바이쉴라흐','Vayeshev':'바예쉐브',
+    'Miketz':'미케쯔','Vayigash':'바이가쉬','Vayechi':'바예히',
+    'Shemot':'쉐모트','Vaeira':'바에라','Bo':'보',
+    'Beshalach':'베샬라흐','Yitro':'이트로','Mishpatim':'미쉬파팀',
+    'Terumah':'테루마','Tetzaveh':'테짜베','Ki Tisa':'키 티사',
+    'Vayakhel':'바야크헬','Pekudei':'페쿠데이','Vayakhel-Pekudei':'바야크헬-페쿠데이',
+    'Vayikra':'바이크라','Tzav':'짜브','Shmini':'쉬미니',
+    'Tazria':'타즈리아','Metzora':'메쪼라','Tazria-Metzora':'타즈리아-메쪼라',
+    'Achrei Mot':'아하레이 모트','Kedoshim':'카도쉼','Achrei Mot-Kedoshim':'아하레이 모트-카도쉼',
+    'Emor':'에모르','Behar':'베하르','Bechukotai':'베호코타이',
+    'Behar-Bechukotai':'베하르-베호코타이',
+    'Bamidbar':'베미드바르','Nasso':'나쏘',"Beha'alotcha":'베하알로트카',
+    "Sh'lach":'쉘라흐','Korach':'코라흐','Chukat':'후카트',
+    'Balak':'발락','Chukat-Balak':'후카트-발락','Pinchas':'핀하스',
+    'Matot':'마토트','Masei':'마세이','Matot-Masei':'마토트-마세이',
+    'Devarim':'데바림','Vaetchanan':'바에트하난','Eikev':'에케브',
+    "Re'eh":'레에','Shoftim':'쇼프팀','Ki Teitzei':'키 테체이',
+    'Ki Tavo':'키 타보','Nitzavim':'니차빔','Vayeilech':'바옐레흐',
+    'Nitzavim-Vayeilech':'니차빔-바옐레흐',"Ha'azinu":'하아지누',
+    'Vezot Haberakhah':'베조트 하베라하'
+  };
+
+  const PARSHA_WEEK_NUM = {
+    'Bereshit':1,'Noach':2,'Lech-Lecha':3,'Vayeira':4,'Chayei Sara':5,
+    'Toldot':6,'Vayetzei':7,'Vayishlach':8,'Vayeshev':9,'Miketz':10,
+    'Vayigash':11,'Vayechi':12,'Shemot':13,'Vaeira':14,'Bo':15,
+    'Beshalach':16,'Yitro':17,'Mishpatim':18,'Terumah':19,'Tetzaveh':20,
+    'Ki Tisa':21,'Vayakhel':22,'Pekudei':23,'Vayakhel-Pekudei':'22-23',
+    'Vayikra':24,'Tzav':25,'Shmini':26,'Tazria':27,'Metzora':28,
+    'Tazria-Metzora':'27-28','Achrei Mot':29,'Kedoshim':30,
+    'Achrei Mot-Kedoshim':'29-30','Emor':31,'Behar':32,'Bechukotai':33,
+    'Behar-Bechukotai':'32-33','Bamidbar':34,'Nasso':35,"Beha'alotcha":36,
+    "Sh'lach":37,'Korach':38,'Chukat':39,'Balak':40,'Chukat-Balak':'39-40',
+    'Pinchas':41,'Matot':42,'Masei':43,'Matot-Masei':'42-43',
+    'Devarim':44,'Vaetchanan':45,'Eikev':46,"Re'eh":47,'Shoftim':48,
+    'Ki Teitzei':49,'Ki Tavo':50,'Nitzavim':51,'Vayeilech':52,
+    'Nitzavim-Vayeilech':'51-52',"Ha'azinu":53,'Vezot Haberakhah':54
+  };
+
+  // 아포스트로피 변형 통일 후 매핑
+  function pKo(t) {
+    const raw = t.replace(/^Parashat\s+/i,'').trim();
+    // 다양한 아포스트로피 형태 통일 (', ', ʼ 등 → ')
+    const normalized = raw.replace(/[\u2018\u2019\u02bc\u0060]/g, "'");
+    return PKO[normalized] || PKO[raw] || raw;
+  }
+
+  function bookKo(str) {
+    if(!str) return '';
+    for(const [en,ko] of Object.entries(BOOK_MAP)){
+      if(str.includes(en)) str=str.replace(en,ko);
+    }
+    return str;
+  }
+
+  // "민수기 1:1-4:20" → "민수기 1장 1절 ~ 4장 20절"
+  function formatRange(raw) {
+    if(!raw) return '';
+    const ko = bookKo(raw);
+    // "책이름 X:Y-Z:W" 또는 "책이름 X:Y-W" 형태 처리
+    return ko.replace(/(\d+):(\d+)-(\d+):(\d+)/g, '$1장 $2절 ~ $3장 $4절')
+             .replace(/(\d+):(\d+)-(\d+)/g, '$1장 $2절 ~ $3절')
+             .replace(/(\d+):(\d+)/g, '$1장 $2절');
+  }
+
+  function getWeekNum(enTitle) {
+    const name = enTitle.replace(/^Parashat\s+/i,'').trim();
+    const n = PARSHA_WEEK_NUM[name];
+    return n !== undefined ? n : null;
+  }
+
+  function toISO(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+
+  function getThisShabbat() {
+    const now = new Date();
+    const dow = now.getDay();
+    const diff = dow === 6 ? 0 : -(dow + 1);
+    return toISO(addDays(now, diff));
+  }
+
+  // 히브리력 연도 → 그레고리력 범위 (넉넉하게 10월까지)
+  function hebrewYearRange(hy) {
+    const start = hy - 3761;
+    return { start: `${start}-09-01`, end: `${start+1}-10-15` };
+  }
+
+  async function fetchYearData(hebrewYear) {
+    const { start, end } = hebrewYearRange(hebrewYear);
+    const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=on&min=off&mod=off&nx=off&mf=off&ss=off&c=off&geo=none&start=${start}&end=${end}&i=off&leyning=on`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.items || [];
+  }
+
+  const todayISO    = toISO(new Date());
+  const thisShabbat = getThisShabbat();
+
+  let allParshas = [];
+  let currentIdx = 0;
+
+  function updateLabel() {
+    if(allParshas.length === 0) return;
+    const item = allParshas[currentIdx];
+    const iso  = (item.date||'').split('T')[0];
+    const d    = new Date(iso+'T00:00:00');
+    document.getElementById('year-label').textContent = `${d.getFullYear()}년 ${MKO[d.getMonth()]}`;
+  }
+
+  async function render() {
+    const app = document.getElementById('app');
+    app.innerHTML = `<div class="loading"><div class="sp"></div><span>포션 일정 불러오는 중...</span></div>`;
+    document.getElementById('banner').style.display = 'none';
+    document.getElementById('year-label').textContent = '...';
+
+    // 5786 + 5787 두 연도 동시에 불러오기
+    let items = [];
+    try {
+      const [items1, items2] = await Promise.all([
+        fetchYearData(5786),
+        fetchYearData(5787)
+      ]);
+      items = [...items1, ...items2];
+    } catch(e) {
+      app.innerHTML = `<div class="err">데이터를 불러오지 못했어요.<br><small>${e.message}</small></div>`;
+      return;
+    }
+
+    const parshas  = items.filter(it => it.category === 'parashat');
+    const holidays = items.filter(it => it.category === 'holiday');
+    const holidaySatSet = new Set(
+      holidays
+        .filter(it => { const d=new Date(it.date.split('T')[0]+'T00:00:00'); return d.getDay()===6; })
+        .map(it => it.date.split('T')[0])
+    );
+
+    const parshaMap = {};
+    parshas.forEach(it => {
+      const d = it.date.split('T')[0];
+      parshaMap[d] = it;
+    });
+
+    const startD = new Date(`${5786-3761}-09-01T00:00:00`);
+    const endD   = new Date(`${5787-3760}-10-15T00:00:00`);
+    for(let d=new Date(startD); d<=endD; d.setDate(d.getDate()+1)){
+      if(d.getDay()===6){
+        const iso=toISO(d);
+        if(!parshaMap[iso]){
+          let near=false;
+          for(const h of holidaySatSet){
+            if(Math.abs(new Date(h+'T00:00:00')-new Date(iso+'T00:00:00'))<=3*86400000){ near=true; break; }
+          }
+          if(near) parshaMap[iso] = { __special__: true, date: iso };
+        }
+      }
+    }
+
+    const sorted = Object.values(parshaMap).sort((a,b) => {
+      const da = (a.date||'').split('T')[0];
+      const db = (b.date||'').split('T')[0];
+      return da.localeCompare(db);
+    });
+
+    allParshas = sorted;
+
+    // 현재 인덱스 = thisShabbat과 가장 가까운 항목
+    const tIdx = sorted.findIndex(it => (it.date||'').split('T')[0] === thisShabbat);
+    if(tIdx >= 0) currentIdx = tIdx;
+    else {
+      // 가장 가까운 미래 포션
+      const futureIdx = sorted.findIndex(it => (it.date||'').split('T')[0] >= thisShabbat);
+      currentIdx = futureIdx >= 0 ? futureIdx : sorted.length - 1;
+    }
+
+    updateLabel();
+
+    // 배너
+    const currentItem = parshaMap[thisShabbat];
+    if(currentItem && !currentItem.__special__){
+      const wn = getWeekNum(currentItem.title||'');
+      document.getElementById('banner-name').textContent = (wn ? `${wn}주차 ` : '') + pKo(currentItem.title||'');
+      const range = currentItem.leyning?.torah || '';
+      document.getElementById('banner-range').textContent = formatRange(range) || '성경 범위';
+      document.getElementById('banner').style.display = 'flex';
+    }
+
+    // 월별 그룹핑
+    const groups = {};
+    sorted.forEach(item => {
+      const d = (item.date||'').split('T')[0];
+      if(!d) return;
+      const date = new Date(d+'T00:00:00');
+      const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+      if(!groups[key]) groups[key] = [];
+      groups[key].push({ item, iso: d, date });
+    });
+
+    let html = `<div class="timeline">`;
+
+    Object.entries(groups).forEach(([key, entries]) => {
+      const [y, m] = key.split('-').map(Number);
+      html += `<div class="month-group">`;
+      html += `<div class="month-label" data-yearmonth="${y}-${String(m).padStart(2,'0')}">${y}년 ${MKO[m-1]}</div>`;
+
+      entries.forEach(({ item, iso, date }) => {
+        const isSpecial = !!item.__special__;
+        const isCurrent = iso === thisShabbat;
+        const isPast    = iso < thisShabbat;
+
+        const dayNum  = date.getDate();
+        const monthSh = MSHORT[date.getMonth()];
+        const dowStr  = DOWKO[date.getDay()];
+
+        if(isSpecial) {
+          const isPastSpecial = iso < thisShabbat;
+          html += `
+            <div class="parsha-card special${isPastSpecial ? ' past' : ''}">
+              <div class="card-date">
+                <div class="date-month">${monthSh}</div>
+                <div class="date-day">${dayNum}</div>
+                <div class="date-dow">${dowStr}</div>
+              </div>
+              <div class="card-body">
+                <div class="card-main">
+                  <div class="card-week-num">특별 주간</div>
+                  <div class="card-name-row">
+                    <div class="card-name">✦ 특별 낭독 주간</div>
+                    <div class="card-book">명절 특별 낭독</div>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+          return;
+        }
+
+        const koName  = pKo(item.title||'');
+        const wn      = getWeekNum(item.title||'');
+        const wnStr   = wn ? `${wn}주차` : '';
+        const range   = formatRange(item.leyning?.torah || '');
+        const cardCls = isCurrent ? 'parsha-card current' : isPast ? 'parsha-card past' : 'parsha-card';
+
+        html += `
+          <a class="${cardCls}" href="index.html?shabbat=${iso}" data-iso="${iso}">
+            <div class="card-date">
+              <div class="date-month">${monthSh}</div>
+              <div class="date-day">${dayNum}</div>
+              <div class="date-dow">${dowStr}</div>
+            </div>
+            <div class="card-body">
+              <div class="card-main">
+                ${wnStr ? `<div class="card-week-num">${wnStr}</div>` : ''}
+                <div class="card-name-row">
+                  <div class="card-name">${koName}</div>
+                  ${range ? `<div class="card-book">${range}</div>` : ''}
+                </div>
+              </div>
+              <i class="ti ti-chevron-right card-arrow"></i>
+            </div>
+          </a>`;
+      });
+
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+    app.innerHTML = html;
+
+    // 이번 주 포션으로 스크롤
+    setTimeout(() => {
+      const el = document.querySelector('.parsha-card.current');
+      if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 400);
+
+    // ── 스크롤 싱크: 스크롤 이벤트로 현재 보이는 월 감지
+    function syncLabel() {
+      const labels = document.querySelectorAll('.month-label[data-yearmonth]');
+      const headerH = 60; // 헤더 높이
+      let current = null;
+
+      labels.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if(rect.top <= headerH + 10) current = el;
+      });
+
+      if(current) {
+        const ym = current.dataset.yearmonth;
+        const [y, m] = ym.split('-').map(Number);
+        document.getElementById('year-label').textContent = `${y}년 ${MKO[m-1]}`;
+
+        const visibleIdx = allParshas.findIndex(it => {
+          const d = (it.date||'').split('T')[0];
+          return d.startsWith(ym);
+        });
+        if(visibleIdx >= 0) currentIdx = visibleIdx;
+      }
+    }
+
+    window.addEventListener('scroll', syncLabel, { passive: true });
+    syncLabel(); // 초기 실행
+  }
+
+  // 월 이동 (← 이전 월, → 다음 월) — currentIdx 기준으로 이동
+  function changeYear(delta) {
+    if(allParshas.length === 0) return;
+
+    const current = allParshas[currentIdx];
+    const currentDate = new Date((current.date||'').split('T')[0]+'T00:00:00');
+
+    // 현재 보이는 월 기준으로 delta 만큼 이동
+    const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + delta, 1);
+    const targetISO  = `${targetDate.getFullYear()}-${String(targetDate.getMonth()+1).padStart(2,'0')}`;
+
+    // 해당 월에 가장 가까운 포션 찾기
+    let nextIdx = allParshas.findIndex(it => {
+      const d = (it.date||'').split('T')[0];
+      return d.startsWith(targetISO);
+    });
+
+    if(nextIdx < 0) {
+      // 해당 월에 포션이 없으면 가장 가까운 미래 항목
+      nextIdx = allParshas.findIndex(it => {
+        const d = (it.date||'').split('T')[0];
+        return d > targetISO;
+      });
+    }
+
+    if(nextIdx < 0 || nextIdx >= allParshas.length) return;
+
+    currentIdx = nextIdx;
+    updateLabel();
+
+    const item = allParshas[currentIdx];
+    const iso  = (item.date||'').split('T')[0];
+    const el   = document.querySelector(`[data-iso="${iso}"]`);
+    if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  render();
+</script>
+</body>
+</html>
