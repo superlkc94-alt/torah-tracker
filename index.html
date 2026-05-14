@@ -59,8 +59,28 @@
     /* 상단 네비 */
     .top-nav {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 1.5rem;
+    }
+
+    .timeline-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-info);
+      text-decoration: none;
+      padding: 6px 12px;
+      border: 0.5px solid var(--border-tertiary);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      transition: all 0.15s;
+    }
+
+    .timeline-btn:hover {
+      border-color: var(--text-info);
+      background: var(--bg-info);
     }
 
     .calendar-btn {
@@ -304,6 +324,10 @@
   <div class="container">
 
     <div class="top-nav">
+      <a href="calendor_timeline.html" class="timeline-btn">
+        <i class="ti ti-list"></i>
+        포션 일정
+      </a>
       <a href="calendar.html" class="calendar-btn">
         <i class="ti ti-calendar"></i>
         전체 캘린더 보기
