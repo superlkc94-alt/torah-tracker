@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="color-scheme" content="light only">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>토라 포션 트래커</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,22 +28,7 @@
       --radius-lg: 12px;
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg-primary: #1e1e1c;
-        --bg-secondary: #2a2a27;
-        --bg-info: #0c447c;
-        --bg-success: #27500a;
-        --text-primary: #f0ede6;
-        --text-secondary: #b4b2a9;
-        --text-tertiary: #888780;
-        --text-info: #85b7eb;
-        --text-success: #97c459;
-        --border-tertiary: rgba(255,255,255,0.1);
-        --border-secondary: rgba(255,255,255,0.2);
-        --border-success: #3b6d11;
-      }
-    }
+    
 
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -318,6 +304,14 @@
       .portion-name { font-size: 22px; }
       .cal-row { grid-template-columns: 1.8fr 2fr 1fr; }
     }
+  
+    /* ── 라이트모드 강제 고정 ── */
+    :root, body {
+      color-scheme: light only;
+      background-color: #f7f6f2 !important;
+      color: #1c1a16 !important;
+    }
+    
   </style>
 </head>
 <body>
@@ -348,9 +342,31 @@
     const MONTH_KO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 
     const BOOK_MAP = {
+      // 모세오경 (토라)
       'Genesis':'창세기','Exodus':'출애굽기','Leviticus':'레위기',
-      'Numbers':'민수기','Deuteronomy':'신명기'
+      'Numbers':'민수기','Deuteronomy':'신명기',
+      // 선지서 (하프타라)
+      'Joshua':'여호수아','Judges':'사사기',
+      'I Samuel':'사무엘상','II Samuel':'사무엘하',
+      'I Kings':'열왕기상','II Kings':'열왕기하',
+      'Isaiah':'이사야','Jeremiah':'예레미야','Ezekiel':'에스겔',
+      'Hosea':'호세아','Joel':'요엘','Amos':'아모스',
+      'Obadiah':'오바댜','Jonah':'요나','Micah':'미가',
+      'Nahum':'나훔','Habakkuk':'하박국','Zephaniah':'스바냐',
+      'Haggai':'학개','Zechariah':'스가랴','Malachi':'말라기'
     };
+
+    // 하프타라 특별 명칭 제거 (| Shabbat Machar Chodesh 등)
+    function formatHaftara(str) {
+      if (!str) return '';
+      // "|" 이후 특별 명칭 제거
+      str = str.replace(/\s*\|.*$/, '').trim();
+      // 책 이름 한국어 변환
+      for (const [en, ko] of Object.entries(BOOK_MAP)) {
+        if (str.includes(en)) str = str.replace(en, ko);
+      }
+      return str;
+    }
 
     const PARSHA_KO = {
       'Bereshit':'베레쉬트','Noach':'노아흐','Lech-Lecha':'레흐-레하',
@@ -420,7 +436,7 @@
       return 'torah-tracker-' + name.toLowerCase().replace(/[\s/]+/g,'-');
     }
 
-    function renderPage(parshaTitle, parshaHebrew, shabbatDate, fullRange, aliyot, weekDates) {
+    function renderPage(parshaTitle, parshaHebrew, shabbatDate, fullRange, haftara, aliyot, weekDates) {
       const today = toISO(new Date());
       const key = storageKey(parshaTitle);
       const saved = localStorage.getItem(key);
@@ -448,13 +464,18 @@
 
         <div class="info-grid">
           <div class="info-card">
-            <div class="info-card-label">성경 범위</div>
+            <div class="info-card-label">📖 토라</div>
             <div class="info-card-value">${bookKo(fullRange)}</div>
           </div>
           <div class="info-card">
             <div class="info-card-label">샤밧 낭독일</div>
             <div class="info-card-value">${toKoDate(shabbatDate)} (토)</div>
           </div>
+          ${haftara ? `
+          <div class="info-card" style="grid-column: 1 / -1;">
+            <div class="info-card-label">📜 하프타라</div>
+            <div class="info-card-value">${formatHaftara(haftara)}</div>
+          </div>` : ''}
         </div>
 
         <div class="section-label">일별 읽기 체크 (${weekStart} – ${weekEnd})</div>
@@ -524,28 +545,43 @@
     async function loadParsha() {
       try {
         const weekDates = getWeekDates();
-        const shabbatDate = weekDates[6];
 
-        const url = `https://www.hebcal.com/shabbat?cfg=json&geonameid=1835848&M=on&lg=s&leyning=on`;
-        const res = await fetch(url);
+        // 가장 최근 토요일 날짜 계산 (로컬 시간 기준)
+        const now = new Date();
+        const dow = now.getDay(); // 0=일, 1=월 ... 6=토
+        const diff = dow === 6 ? 0 : dow + 1; // 토요일이면 0, 일요일이면 1, 월요일이면 2...
+        const lastSat = new Date(now);
+        lastSat.setDate(now.getDate() - diff);
+
+        // YYYY-MM-DD 형식 (로컬 시간 기준)
+        const y = lastSat.getFullYear();
+        const m = String(lastSat.getMonth() + 1).padStart(2, '0');
+        const d = String(lastSat.getDate()).padStart(2, '0');
+        const shabbatISO = `${y}-${m}-${d}`;
+
+        const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=off&min=off&mod=off&nx=off&mf=off&ss=off&c=off&geo=none&start=${shabbatISO}&end=${shabbatISO}&i=off&leyning=on`;
+        const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
         const item = data.items?.find(it => it.category === 'parashat');
         if (!item) throw new Error('포션 정보 없음');
 
+        const shabbatDate = (item.date || '').split('T')[0] || weekDates[6];
+
         const parshaEn     = item.title || '';
         const parshaTitle  = parshaKo(parshaEn);
         const parshaHebrew = item.hebrew || '';
         const leyning      = item.leyning || {};
         const fullRange    = leyning.torah || '';
+        const haftara      = leyning.haftarah || '';
 
         const aliyot = [];
         for (let i = 1; i <= 6; i++) {
           if (leyning[String(i)]) aliyot.push(leyning[String(i)]);
         }
 
-        renderPage(parshaTitle, parshaHebrew, shabbatDate, fullRange, aliyot, weekDates);
+        renderPage(parshaTitle, parshaHebrew, shabbatDate, fullRange, haftara, aliyot, weekDates);
 
       } catch (e) {
         console.error('오류:', e);

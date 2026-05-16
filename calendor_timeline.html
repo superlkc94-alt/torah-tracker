@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="color-scheme" content="light only">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>토라 포션 타임라인</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,25 +31,7 @@
       --radius-sm: 8px;
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #141412;
-        --bg-card: #1e1d1a;
-        --bg-current: #2a2010;
-        --bg-special: #1a1528;
-        --text: #f0ede6;
-        --text2: #a8a49c;
-        --text3: #555;
-        --text-info: #7ab3e8;
-        --text-current: #f0a840;
-        --text-special: #b89fe0;
-        --accent: #e8534a;
-        --accent-soft: #3a1a18;
-        --border: rgba(255,255,255,0.07);
-        --border-current: #92600a;
-        --line: rgba(255,255,255,0.08);
-      }
-    }
+    
 
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -301,6 +284,15 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    .card-haftara {
+      font-size: 12px;
+      color: #5a5a5a;
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
       color: var(--text3);
       margin-top: 2px;
     }
@@ -407,9 +399,18 @@
       .date-day { font-size: 18px; }
       .card-name { font-size: 15px; white-space: normal; }
       .card-book { font-size: 12px; white-space: normal; }
+      .card-haftara { font-size: 11px; white-space: normal; }
       .card-body { padding: 10px 10px; }
       .card-name-row { flex-direction: column; gap: 3px; }
     }
+  
+    /* ── 라이트모드 강제 고정 ── */
+    :root, body {
+      color-scheme: light only;
+      background-color: #f7f6f2 !important;
+      color: #1c1a16 !important;
+    }
+    
   </style>
 </head>
 <body>
@@ -553,7 +554,7 @@
 
   async function fetchYearData(hebrewYear) {
     const { start, end } = hebrewYearRange(hebrewYear);
-    const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=on&min=off&mod=off&nx=off&mf=off&ss=off&c=off&geo=none&start=${start}&end=${end}&i=off&leyning=on`;
+    const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=on&min=off&mod=off&nx=off&mf=off&ss=off&c=off&geo=none&start=${start}&end=${end}&i=off&leyning=on&t=${Date.now()}`;
     const res = await fetch(url);
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
@@ -704,6 +705,7 @@
         const wn      = getWeekNum(item.title||'');
         const wnStr   = wn ? `${wn}주차` : '';
         const range   = formatRange(item.leyning?.torah || '');
+        const haftara = formatRange(item.leyning?.haftara || '');
         const cardCls = isCurrent ? 'parsha-card current' : isPast ? 'parsha-card past' : 'parsha-card';
 
         html += `
@@ -718,8 +720,9 @@
                 ${wnStr ? `<div class="card-week-num">${wnStr}</div>` : ''}
                 <div class="card-name-row">
                   <div class="card-name">${koName}</div>
-                  ${range ? `<div class="card-book">${range}</div>` : ''}
+                  ${range ? `<div class="card-book">📖 ${range}</div>` : ''}
                 </div>
+                ${haftara ? `<div class="card-haftara">📜 ${haftara}</div>` : ''}
               </div>
               <i class="ti ti-chevron-right card-arrow"></i>
             </div>

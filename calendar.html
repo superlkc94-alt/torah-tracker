@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="color-scheme" content="light only">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>토라 포션 캘린더</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,17 +31,7 @@
       --bar-special-text: #6b4fa0;
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1e1e1c; --bg2: #2a2a27; --bg-info: #0c447c;
-        --text: #f0ede6; --text2: #b4b2a9; --text3: #555;
-        --text-info: #85b7eb; --text-sun: #f07070; --text-sat: #6fa8f0;
-        --border: rgba(255,255,255,0.07);
-        --bar: #3a3a38; --bar-text: #d0cdc6;
-        --bar-current: #c0392b; --bar-current-text: #fff;
-        --bar-special: #2d1f4a; --bar-special-text: #b89fe0;
-      }
-    }
+    
 
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -175,6 +166,14 @@
       .bar-link { font-size:9px; height:18px; line-height:18px; padding:0 3px; }
       .bar-overlay { top:24px; height:18px; }
     }
+  
+    /* ── 라이트모드 강제 고정 ── */
+    :root, body {
+      color-scheme: light only;
+      background-color: #f7f6f2 !important;
+      color: #1c1a16 !important;
+    }
+    
   </style>
 </head>
 <body>
@@ -273,7 +272,7 @@
     const start = toISO(new Date(year, month-1, -6));
     const end   = toISO(new Date(year, month, 14));
     // maj=on 으로 명절도 같이 가져옴
-    const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=on&min=off&mod=off&nx=off&mf=off&ss=off&c=off&geo=none&start=${start}&end=${end}&i=off`;
+    const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=on&min=off&mod=off&nx=off&mf=off&ss=off&c=off&geo=none&start=${start}&end=${end}&i=off&t=${Date.now()}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
