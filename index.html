@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>토라 포션 트래커</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -130,47 +130,41 @@
     }
 
     .portion-title {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 500;
-      letter-spacing: 0.08em;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
+      letter-spacing: 0;
+      color: #5a5a5a;
+      text-transform: none;
       margin-bottom: 4px;
     }
 
     .portion-name {
-      font-size: 28px;
-      font-weight: 500;
-      color: var(--text-primary);
+      font-size: 32px;
+      font-weight: 700;
+      color: #2a2a2a;
       line-height: 1.2;
+      font-family: 'Noto Serif KR', serif;
     }
 
     .portion-hebrew {
       display: inline;
       font-size: 20px;
-      color: var(--text-secondary);
+      color: #888;
       font-family: serif;
       direction: rtl;
       unicode-bidi: embed;
+      font-weight: 400;
     }
 
-    .week-badge {
-      background: var(--bg-info);
-      color: var(--text-info);
-      font-size: 12px;
-      font-weight: 500;
-      padding: 5px 14px;
-      border-radius: var(--radius-md);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
+    /* 1. Hebcal 자동 연동 배지 제거 */
+    .week-badge { display: none; }
 
     .section-label {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 500;
       letter-spacing: 0.08em;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
+      color: #5a5a5a;
+      text-transform: none;
       margin-bottom: 10px;
     }
 
@@ -188,8 +182,8 @@
       padding: 12px 14px;
     }
 
-    .info-card-label { font-size: 12px; color: var(--text-tertiary); margin-bottom: 4px; }
-    .info-card-value { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .info-card-label { font-size: 13px; color: #5a5a5a; margin-bottom: 4px; font-weight: 500; }
+    .info-card-value { font-size: 16px; font-weight: 500; color: var(--text-primary); }
 
     .calendar {
       background: var(--bg-primary);
@@ -208,10 +202,10 @@
     }
 
     .cal-header span {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 500;
       letter-spacing: 0.06em;
-      color: var(--text-tertiary);
+      color: #5a5a5a;
       text-transform: uppercase;
     }
 
@@ -241,9 +235,9 @@
       vertical-align: middle;
     }
 
-    .day-name { font-size: 14px; color: var(--text-primary); }
-    .day-date { font-size: 12px; color: var(--text-tertiary); margin-top: 1px; }
-    .range { font-size: 12px; color: var(--text-secondary); }
+    .day-name { font-size: 15px; color: #444444; font-weight: 500; }
+    .day-date { font-size: 13px; color: #5a5a5a; margin-top: 1px; }
+    .range { font-size: 15px; color: #444444; font-weight: 500; }
 
     .check-wrap { display: flex; justify-content: flex-end; }
 
@@ -454,7 +448,7 @@
       document.getElementById('app').innerHTML = `
         <div class="week-header">
           <div>
-            <div class="portion-title">이번 주 토라 포션</div>
+            <div class="portion-title">이번주 토라포션</div>
             <div class="portion-name">${parshaTitle} <span class="portion-hebrew">(${parshaHebrew})</span></div>
           </div>
           <div>

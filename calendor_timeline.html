@@ -14,18 +14,18 @@
     :root {
       --bg: #f7f6f2;
       --bg-card: #ffffff;
-      --bg-current: #fff8ed;
+      --bg-current: #DEEBF8;
       --bg-special: #f3f0fb;
       --text: #1c1a16;
       --text2: #6b6760;
       --text3: #b0ada6;
-      --text-info: #1a5fa8;
-      --text-current: #b45309;
+      --text-info: #195FA4;
+      --text-current: #195FA4;
       --text-special: #6b4fa0;
-      --accent: #e8534a;
-      --accent-soft: #fde8e7;
+      --accent: #195FA4;
+      --accent-soft: #DEEBF8;
       --border: rgba(0,0,0,0.08);
-      --border-current: #f0c070;
+      --border-current: #195FA4;
       --line: rgba(0,0,0,0.1);
       --radius: 12px;
       --radius-sm: 8px;
@@ -124,7 +124,10 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      transition: opacity 0.15s;
     }
+
+    .banner-inner:hover { opacity: 0.85; }
 
     @media (max-width: 480px) {
       .current-banner { padding-left: 0.75rem; padding-right: 0.75rem; }
@@ -133,9 +136,9 @@
     .current-dot {
       width: 8px; height: 8px;
       border-radius: 50%;
-      background: var(--accent);
+      background: #195FA4;
       flex-shrink: 0;
-      box-shadow: 0 0 0 3px var(--accent-soft);
+      box-shadow: 0 0 0 3px #DEEBF8;
     }
 
     .current-label {
@@ -239,7 +242,7 @@
       padding: 12px 14px;
       background: var(--bg-card);
       border: 0.5px solid var(--border);
-      border-left: 3px solid transparent;
+      border-left: 0.5px solid var(--border);
       border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
       display: flex;
       align-items: center;
@@ -313,18 +316,26 @@
       color: var(--text-current);
     }
 
+    .parsha-card.current .card-date {
+      background: var(--bg-current);
+      border-color: var(--border-current);
+    }
+
+    .parsha-card.current .card-date .date-day {
+      color: #195FA4;
+    }
+
     .parsha-card.current .card-body {
       background: var(--bg-current);
       border-color: var(--border-current);
-      border-left-color: var(--accent);
     }
 
     .parsha-card.current .card-name {
-      color: var(--text-current);
+      color: #195FA4;
     }
 
     .parsha-card.current .card-week-num {
-      color: var(--accent);
+      color: #195FA4;
     }
 
     /* 지난 포션 흐리게 */
@@ -335,24 +346,25 @@
 
     /* 특별 낭독 주간 */
     .parsha-card.special .card-date {
-      background: var(--bg-card);
-      border-color: var(--border);
+      background: #d8d8d8;
+      border-color: #c8c8c8;
     }
 
     .parsha-card.special .card-body {
-      background: var(--bg-card);
-      border-color: var(--border);
-      border-left-color: transparent;
+      background: #d8d8d8;
+      border-color: #c8c8c8;
     }
 
     .parsha-card.special .card-name {
       color: var(--text-special);
-      font-style: italic;
+      font-style: normal;
     }
 
     .parsha-card.special .card-week-num {
       color: var(--text-special);
     }
+
+    .parsha-card.special:hover { transform: none; }
 
     /* 지난 특별 낭독 주간도 흐리게 */
     .parsha-card.special.past .card-date,
@@ -418,25 +430,28 @@
   <div class="header">
     <div class="header-inner">
       <a href="index.html" class="back-btn">
-        <i class="ti ti-arrow-left"></i> 이번 주로
+        <i class="ti ti-arrow-left"></i> 오늘 토라포션
       </a>
       <div class="header-center">
         <button class="year-btn" onclick="changeYear(-1)"><i class="ti ti-chevron-left"></i></button>
         <div class="year-label" id="year-label">...</div>
         <button class="year-btn" onclick="changeYear(1)"><i class="ti ti-chevron-right"></i></button>
       </div>
-      <div style="width:80px"></div>
+      <a href="calendar.html" class="back-btn">
+        <i class="ti ti-calendar"></i> 캘린더 보기
+      </a>
     </div>
   </div>
 
-  <div id="banner" style="display:none" class="current-banner">
-    <div class="banner-inner">
+  <div id="banner" style="display:none" class="current-banner" onclick="scrollToCurrentWeek()" title="이번 주 포션으로 이동">
+    <div class="banner-inner" style="cursor:pointer;">
       <div class="current-dot"></div>
-      <div>
+      <div style="flex:1">
         <div class="current-label">이번 주 포션</div>
         <div class="current-name" id="banner-name">—</div>
         <div class="current-range" id="banner-range">—</div>
       </div>
+      <div style="color:var(--text-current); font-size:18px; padding-left:8px;">›</div>
     </div>
   </div>
 
@@ -528,8 +543,10 @@
   }
 
   function getWeekNum(enTitle) {
-    const name = enTitle.replace(/^Parashat\s+/i,'').trim();
-    const n = PARSHA_WEEK_NUM[name];
+    const raw = enTitle.replace(/^Parashat\s+/i,'').trim();
+    // 아포스트로피 변형 통일
+    const normalized = raw.replace(/[\u2018\u2019\u02bc\u0060']/g, "'");
+    const n = PARSHA_WEEK_NUM[normalized] || PARSHA_WEEK_NUM[raw];
     return n !== undefined ? n : null;
   }
 
@@ -692,7 +709,7 @@
                 <div class="card-main">
                   <div class="card-week-num">특별 주간</div>
                   <div class="card-name-row">
-                    <div class="card-name">✦ 특별 낭독 주간</div>
+                    <div class="card-name">특별 낭독 주간</div>
                     <div class="card-book">명절 특별 낭독</div>
                   </div>
                 </div>
@@ -803,6 +820,11 @@
     const iso  = (item.date||'').split('T')[0];
     const el   = document.querySelector(`[data-iso="${iso}"]`);
     if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function scrollToCurrentWeek() {
+    const el = document.querySelector('.parsha-card.current');
+    if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   render();
