@@ -554,7 +554,7 @@
         const shabbatISO = `${y}-${m}-${d}`;
 
         const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=off&min=off&mod=off&nx=off&mf=off&ss=off&c=off&geo=none&start=${shabbatISO}&end=${shabbatISO}&i=off&leyning=on`;
-        const res = await fetch(url, { cache: 'no-store' });
+        const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 

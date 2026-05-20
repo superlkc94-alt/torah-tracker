@@ -81,7 +81,6 @@
     /* 주 행 */
     .week-row {
       display:grid; grid-template-columns:repeat(7,1fr);
-      position:relative;
       border-bottom:0.5px solid var(--border);
     }
     .week-row:last-child { border-bottom:none; }
@@ -99,54 +98,43 @@
     .dc.sun-col:not(.other) .dn { color:var(--text-sun); }
     .dc.sat-col:not(.other) .dn { color:var(--text-sat); }
 
-    /* 오늘 — 셀 테두리 강조 */
+    /* 오늘 — 연한 파란 배경 + 네이비 테두리 */
     .dc.today {
-      outline: 1px solid #4F4F4F;
+      background: #DEEBF8;
+      outline: 1.5px solid #195FA4;
       outline-offset: -1px;
       position: relative;
       z-index: 2;
     }
-    .dc.today .dn { color: #4F4F4F; font-weight: 500; }
+    .dc.today .dn { color: #195FA4; font-weight: 600; }
+    .dc.today .cell-parsha { color: #195FA4; font-weight: 700; }
+    .dc.today .cell-aliyah { color: #1a1a18; }
 
-    /* ── 포션 바 오버레이 ── */
-    /*
-      토라포션은 토요일(샤밧)에 낭독 시작.
-      바는 그 주 토요일(col 6)부터 다음 주 금요일(col 5)까지.
-      달력은 일~토 7열이므로:
-        - 토요일 시작 → 같은 행의 col 6(토)만 해당 행에서 채움
-        - 다음 행(일~금, col 0~5)에 이어서 채움
-        - 이후 포션이 다시 시작될 때까지 반복
-    */
-
-    /* 바는 position:absolute로 week-row 위에 오버레이 */
-    .bar-overlay {
-      position:absolute;
-      top:30px;
-      height:22px;
-      pointer-events:none;
-      z-index:3;
-      padding: 0 3px;
+    /* 셀 내 포션 표시 */
+    .cell-parsha {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      color: #444;
+      text-decoration: none;
+      margin-top: 4px;
+      line-height: 1.3;
+      word-break: keep-all;
     }
+    .cell-parsha:hover { color: var(--text-info); }
+    .cell-parsha.current { color: #1a1a18; font-weight: 700; }
+    .cell-parsha.sat { font-size: 10px; font-weight: 700; color: #444; }
+    .cell-parsha.sat.current { color: #1a1a18; }
+    .cell-parsha.special { color: #6b4fa0; }
 
-    .bar-link {
-      display:block; height:22px; line-height:22px;
-      font-size:11px; font-weight:500;
-      padding:0 8px; border-radius:4px;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      background:var(--bar); color:var(--bar-text);
-      text-decoration:none; pointer-events:all; cursor:pointer;
-      transition:opacity .15s;
-    }
-    .bar-link:hover { opacity:.8; }
-    .bar-link.current { background:var(--bar-current); color:var(--bar-current-text); }
-    .bar-link.special {
-      background:var(--bar-special); color:var(--bar-special-text);
-      font-style:italic; letter-spacing:0.01em;
-    }
-
-    /* 금→토 구분: 바 오버레이에 좌우 여백으로 자연스럽게 구분 */
-    .dc.sat-col {
-      padding-left: 6px;
+    .cell-aliyah {
+      font-size: 10px;
+      color: var(--text2);
+      margin-top: 2px;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* 로딩 */
@@ -163,8 +151,7 @@
       .month-title { font-size:20px; }
       .dc { min-height:56px; padding:5px 3px 2px; }
       .dn { font-size:11px; }
-      .bar-link { font-size:9px; height:18px; line-height:18px; padding:0 3px; }
-      .bar-overlay { top:24px; height:18px; }
+      .cell-parsha { font-size:9px; }
     }
   
     /* ── 라이트모드 강제 고정 ── */
@@ -227,6 +214,14 @@
 
   function pKo(t) { const n=t.replace(/^Parashat\s+/i,'').trim(); return PKO[n]||n; }
 
+  const BOOK_KO = {
+    'Genesis':'창세기','Exodus':'출애굽기','Leviticus':'레위기',
+    'Numbers':'민수기','Deuteronomy':'신명기'
+  };
+  function rangeKo(r) {
+    return r.replace(/Genesis|Exodus|Leviticus|Numbers|Deuteronomy/g, m => BOOK_KO[m]||m);
+  }
+
   // 토라 포션 전체 고정 주차 (1~54번째 포션 순서)
   // 합쳐진 포션(더블 파샤)은 단독 포션과 같은 번호 부여
   const PARSHA_WEEK_NUM = {
@@ -273,7 +268,7 @@
     const start = toISO(new Date(year, month-1, -6));
     const end   = toISO(new Date(year, month, 14));
     // maj=on 으로 명절도 같이 가져옴
-    const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=on&min=off&mod=off&nx=off&mf=off&ss=off&c=off&geo=none&start=${start}&end=${end}&i=off&t=${Date.now()}`;
+    const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=on&min=off&mod=off&nx=off&mf=off&ss=off&c=off&geo=none&start=${start}&end=${end}&i=off&leyning=on&t=${Date.now()}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
@@ -288,7 +283,10 @@
         const enName = it.title.replace(/^Parashat\s+/i,'').trim();
         const koName = pKo(it.title);
         const weekNum = getParshaWeekNum(it.title);
-        parshaMap[d] = { name: koName, weekNum };
+        const ley = it.leyning || {};
+        const aliyot = [null]; // index 0 비움, aliyot[1]~aliyot[6]
+        for(let i=1;i<=6;i++) aliyot.push(ley[String(i)] || null);
+        parshaMap[d] = { name: koName, weekNum, aliyot };
       }
       if(it.category==='holiday'){
         const date = new Date(d+'T00:00:00');
@@ -354,40 +352,19 @@
     const weeks=[];
     for(let i=0;i<cells.length;i+=7) weeks.push(cells.slice(i,i+7));
 
-    function getBarForWeek(week) {
-      const bars = [];
-
-      // 구간1: 일~금 (col 0~5) → 지난주 토요일 포션
-      const sunCell = week[0];
-      const lastSat = toISO(addDays(sunCell.d, -1));
-      if(pm[lastSat]){
-        let startCol=0, endCol=5;
-        while(startCol<=5 && week[startCol].other) startCol++;
-        while(endCol>=startCol && week[endCol].other) endCol--;
-        if(startCol<=endCol){
-          bars.push({
-            startCol, endCol,
-            name: pm[lastSat].name,
-            weekNum: pm[lastSat].weekNum,
-            shabbatISO: lastSat,
-            isCurrent: lastSat===thisShabbat
-          });
-        }
+    function getParshaForCell(cell) {
+      // 토요일 → 이번 주 샤밧 포션
+      if(cell.dow === 6) {
+        return pm[cell.iso] ? { ...pm[cell.iso], aliyah: 0 } : null;
       }
-
-      // 구간2: 토(col 6) → 이 주 토요일 포션
-      const satCell = week[6];
-      if(!satCell.other && pm[satCell.iso]){
-        bars.push({
-          startCol:6, endCol:6,
-          name: pm[satCell.iso].name,
-          weekNum: pm[satCell.iso].weekNum,
-          shabbatISO: satCell.iso,
-          isCurrent: satCell.iso===thisShabbat
-        });
+      // 일~금 → 지난 주 토요일 포션
+      // 일(0)→알리야1, 월(1)→2, 화(2)→3, 수(3)→4, 목(4)→5, 금(5)→6
+      const lastSat = toISO(addDays(cell.d, -(cell.dow + 1)));
+      if(pm[lastSat]) {
+        const aliyah = cell.dow + 1; // 일=1, 월=2 ... 금=6
+        return { ...pm[lastSat], aliyah, shabbatISO: lastSat };
       }
-
-      return bars;
+      return null;
     }
 
     // ── HTML 생성
@@ -400,28 +377,37 @@
     weeks.forEach(week=>{
       html+=`<div class="week-row">`;
 
-      // 날짜 셀
       week.forEach(cell=>{
         const sc = cell.dow===0?'sun-col':cell.dow===6?'sat-col':'';
         const tc = cell.iso===todayISO?'today':'';
         const oc = cell.other?'other':'';
-        html+=`<div class="dc ${sc} ${tc} ${oc}"><div class="dn">${cell.d.getDate()}</div></div>`;
-      });
+        const parsha = (!cell.other) ? getParshaForCell(cell) : null;
 
-      // 포션 바 오버레이
-      const bars = getBarForWeek(week);
-      bars.forEach(bar=>{
-        const left  = (bar.startCol/7*100).toFixed(3);
-        const right = ((6-bar.endCol)/7*100).toFixed(3);
-        const isSpecial = bar.name === '__special__';
-        const weekPrefix = (!isSpecial && bar.weekNum) ? `${bar.weekNum}주차 ` : '';
-        const displayName = isSpecial ? '✦ 특별 낭독 주간' : `${weekPrefix}${bar.name}`;
-        const cls = isSpecial ? 'bar-link special'
-                  : bar.isCurrent ? 'bar-link current' : 'bar-link';
-        const href = isSpecial ? '' : `href="index.html?shabbat=${bar.shabbatISO}"`;
-        const tag  = isSpecial ? 'span' : 'a';
-        html+=`<div class="bar-overlay" style="left:${left}%;right:${right}%;">
-          <${tag} class="${cls}" ${href} title="${displayName}">${displayName}</${tag}>
+        let parshaHtml = '';
+        if(parsha) {
+          const isSpecial = parsha.name === '__special__';
+          const isCurrent = (parsha.shabbatISO || cell.iso) === thisShabbat;
+
+          if(isSpecial) {
+            parshaHtml = `<div class="cell-parsha special">특별 낭독</div>`;
+          } else if(cell.dow === 6) {
+            // 토요일: 포션명 표시 (알리야1 구절)
+            const shabbatISO = cell.iso;
+            const cls = isCurrent ? 'cell-parsha sat current' : 'cell-parsha sat';
+            const range = parsha.aliyot?.[1] ? `<div class="cell-aliyah">${rangeKo(parsha.aliyot[1])}</div>` : '';
+            parshaHtml = `<a class="${cls}" href="index.html?shabbat=${shabbatISO}">${parsha.name}</a>${range}`;
+          } else {
+            // 일~금: 포션명 + 알리야 번호 + 구절
+            const shabbatISO = parsha.shabbatISO;
+            const cls = isCurrent ? 'cell-parsha current' : 'cell-parsha';
+            const range = parsha.aliyot?.[parsha.aliyah] ? `<div class="cell-aliyah">${rangeKo(parsha.aliyot[parsha.aliyah])}</div>` : '';
+            parshaHtml = `<a class="${cls}" href="index.html?shabbat=${shabbatISO}">${parsha.name} ${parsha.aliyah}</a>${range}`;
+          }
+        }
+
+        html+=`<div class="dc ${sc} ${tc} ${oc}">
+          <div class="dn">${cell.d.getDate()}</div>
+          ${parshaHtml}
         </div>`;
       });
 

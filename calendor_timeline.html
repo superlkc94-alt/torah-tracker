@@ -571,7 +571,7 @@
 
   async function fetchYearData(hebrewYear) {
     const { start, end } = hebrewYearRange(hebrewYear);
-    const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=on&min=off&mod=off&nx=off&mf=off&ss=off&c=off&geo=none&start=${start}&end=${end}&i=off&leyning=on&t=${Date.now()}`;
+    const url = `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=on&min=off&mod=off&nx=off&mf=off&ss=off&c=off&geo=none&start=${start}&end=${end}&i=off&leyning=on`;
     const res = await fetch(url);
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();

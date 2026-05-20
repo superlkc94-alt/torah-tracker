@@ -132,7 +132,7 @@
 
     .parsha-nav-label {
       font-size: 11px;
-      color: var(--text3);
+      color: #777;
       margin-bottom: 4px;
     }
 
@@ -145,17 +145,37 @@
 
     .parsha-nav-date {
       font-size: 11px;
-      color: var(--text3);
+      color: #777;
       margin-top: 3px;
     }
 
-    /* 날짜 */
-    .shabbat-date {
-      text-align: center;
-      font-size: 13px;
-      color: var(--text3);
-      margin-bottom: 1.5rem;
+    /* 명절 설명 카드 */
+    .holiday-desc-card {
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.5rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
     }
+
+    .holiday-desc-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: 'Noto Serif KR', serif;
+      display: block;
+      margin-bottom: 0.6rem;
+    }
+
+    .holiday-desc-text {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.85;
+    }
+
+    /* 날짜 - 숨김 */
+    .shabbat-date { display: none; }
 
     /* 로딩 */
     .loading {
@@ -241,11 +261,69 @@
     return PKO[n] || n;
   }
 
+  // 명절별 이모지 + 설명
+  const HOLIDAY_INFO = {
+    'Shavuot': {
+      icon: '🌾',
+      desc: '유월절(페사흐) 이후 50일째 되는 날로, 하나님께서 시내산에서 이스라엘 백성에게 토라(율법)를 주신 것을 기념하는 절기입니다. 히브리어로 "칠칠절"이라는 뜻으로, 7주를 세어 지키는 절기예요. 신약에서는 성령이 임하신 오순절(펜테코스트)에 해당합니다.'
+    },
+    'Pesach': {
+      icon: '🍷',
+      desc: '이집트의 종살이에서 해방된 것을 기념하는 절기로, 하나님께서 이스라엘 가정을 "넘어가신(Pass over)" 것을 기억합니다. 7일간 누룩 없는 빵(마짜)을 먹으며 출애굽을 기억해요. 예슈아(예수님)의 십자가 사건과 깊이 연결된 절기입니다.'
+    },
+    'Passover': {
+      icon: '🍷',
+      desc: '이집트의 종살이에서 해방된 것을 기념하는 절기로, 하나님께서 이스라엘 가정을 "넘어가신(Pass over)" 것을 기억합니다. 7일간 누룩 없는 빵(마짜)을 먹으며 출애굽을 기억해요. 예슈아(예수님)의 십자가 사건과 깊이 연결된 절기입니다.'
+    },
+    'Rosh Hashana': {
+      icon: '🍎',
+      desc: '히브리어로 "한 해의 머리"라는 뜻으로 유대력 새해입니다. 나팔(쇼파르)을 불며 새해를 맞이하고, 지난 한 해를 돌아보며 하나님 앞에 새롭게 서는 날이에요. 10일간의 경외의 날(야밈 노라임)이 시작되는 절기입니다.'
+    },
+    'Yom Kippur': {
+      icon: '🕍',
+      desc: '"속죄의 날"이라는 뜻으로 유대교에서 가장 거룩한 날입니다. 25시간 동안 금식하며 하나님 앞에 회개하고 용서를 구하는 날이에요. 대제사장이 지성소에 들어가 백성의 죄를 속죄하던 날로, 예슈아의 십자가 보혈과 연결되는 절기입니다.'
+    },
+    'Sukkot': {
+      icon: '🌿',
+      desc: '"초막(장막)절"이라는 뜻으로, 광야 40년 동안 하나님이 이스라엘을 인도하신 것을 기념합니다. 7일 동안 초막(수카)을 짓고 그 안에서 생활하며, 하나님의 보호하심을 기억해요. 장차 임할 하나님 나라의 잔치를 예표하는 절기입니다.'
+    },
+    'Chanukah': {
+      icon: '🕎',
+      desc: '"봉헌, 헌신"이라는 뜻으로, 기원전 165년 마카비 가문이 성전을 탈환하고 재봉헌한 것을 기념합니다. 8일간 하누키아(9개 촛대)에 불을 밝히는 절기예요. 단 하루치 기름이 8일을 밝힌 기적을 기억하며, 어둠을 이기는 빛의 승리를 축하합니다.'
+    },
+    'Purim': {
+      icon: '🎭',
+      desc: '"제비"라는 뜻으로, 에스더서에 기록된 하만의 음모에서 유대 민족이 구원받은 것을 기념하는 절기입니다. 에스더서를 낭독하고 축제를 즐기는 기쁨의 절기예요. 하나님의 보이지 않는 섭리와 구원을 기억하는 날입니다.'
+    },
+    'Shemini Atzeret': {
+      icon: '✨',
+      desc: '"여덟째 날의 모임"이라는 뜻으로, 숙콧(초막절) 바로 다음 날 지키는 절기입니다. 절기를 마무리하며 하나님 앞에 한 번 더 모이는 특별한 날이에요.'
+    },
+    'Simchat Torah': {
+      icon: '📜',
+      desc: '"토라의 기쁨"이라는 뜻으로, 1년 토라 낭독 주기가 끝나고 다시 베레쉬트(창세기)로 돌아가는 것을 축하하는 절기입니다. 토라 두루마리를 들고 기쁘게 춤을 추며 경배해요.'
+    },
+    'Tisha B\'Av': {
+      icon: '😔',
+      desc: '"아브월 9일"이라는 뜻으로, 솔로몬 성전과 제2성전이 모두 파괴된 날을 애도하는 금식일입니다. 이스라엘 민족의 가장 슬픈 날로, 회복과 구원을 간구하는 날이에요.'
+    },
+  };
+
   function holidayKo(title) {
     for(const [en, ko] of Object.entries(HOLIDAY_KO)) {
-      if(title.includes(en)) return ko;
+      if(title.includes(en)) return { ko, en };
     }
-    return title;
+    return { ko: title, en: null };
+  }
+
+  function getHolidayInfo(holidays) {
+    // 원본 영어 제목으로 HOLIDAY_INFO 매칭
+    for(const h of holidays) {
+      for(const [en, info] of Object.entries(HOLIDAY_INFO)) {
+        if(h.title && h.title.includes(en)) return info;
+      }
+    }
+    return { icon: '⭐', desc: null };
   }
 
   function toISO(d) {
@@ -295,10 +373,10 @@
 
       // 명절 이름 (중복 제거)
       const holidayNames = [...new Set(
-        holidays.map(h => holidayKo(h.title)).filter(Boolean)
+        holidays.map(h => holidayKo(h.title).ko).filter(Boolean)
       )];
 
-      render(shabbatISO, holidayNames, prevParsha, nextParsha);
+      render(shabbatISO, holidayNames, holidays, prevParsha, nextParsha);
 
     } catch(e) {
       document.getElementById('app').innerHTML =
@@ -306,10 +384,12 @@
     }
   }
 
-  function render(shabbatISO, holidayNames, prevParsha, nextParsha) {
+  function render(shabbatISO, holidayNames, holidays, prevParsha, nextParsha) {
     const holidayStr = holidayNames.length > 0
       ? holidayNames.join(' · ')
       : '명절 특별 낭독';
+
+    const info = getHolidayInfo(holidays);
 
     const prevName = prevParsha ? pKo(prevParsha.title) : null;
     const prevDate = prevParsha ? prevParsha.date?.split('T')[0] : null;
@@ -318,7 +398,7 @@
 
     document.getElementById('app').innerHTML = `
       <div class="main-card">
-        <div class="special-icon">✡️</div>
+        <div class="special-icon">${info.icon}</div>
         <div class="special-label">이번주 토라포션</div>
         <div class="holiday-name">${holidayStr}</div>
         <div class="special-title">특별 낭독 주간</div>
@@ -327,6 +407,12 @@
           일반 토라 포션 낭독은 쉬어가는 주간이에요.
         </div>
       </div>
+
+      ${info.desc ? `
+      <div class="holiday-desc-card">
+        <div class="holiday-desc-title">${info.icon} ${holidayStr}란?</div>
+        <div class="holiday-desc-text">${info.desc}</div>
+      </div>` : ''}
 
       <div class="shabbat-date">샤밧 · ${toKoDate(shabbatISO)}</div>
 
