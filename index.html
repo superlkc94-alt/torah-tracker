@@ -193,6 +193,84 @@
       margin-bottom: 1.5rem;
     }
 
+    @media (max-width: 800px) {
+      html, body {
+        height: 100dvh;
+        overflow: hidden;
+        padding: 0 !important;
+        margin: 0;
+      }
+      body { align-items: stretch; }
+
+      .container {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        padding: 0 0.75rem;
+        overflow: hidden;
+      }
+
+      .top-nav { flex-shrink:0; padding:1.5dvh 0 0.8dvh; margin-bottom:0; }
+      .timeline-btn, .calendar-btn { font-size:12px; padding:5px 10px; }
+
+      #app {
+        flex: 1 1 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .week-header { flex-shrink:0; margin-bottom:0; padding:1.5dvh 0; }
+      .portion-title { font-size:11px; margin-bottom:2px; }
+      .portion-name { font-size:clamp(16px,3.5dvh,24px); line-height:1.2; }
+      .portion-hebrew { font-size:clamp(13px,2dvh,18px); }
+
+      .info-grid { flex-shrink:0; gap:6px; margin-bottom:0; padding:0.8dvh 0 1.5dvh; }
+      .info-card { padding:clamp(6px,1dvh,10px) 10px; }
+      .info-card-label { font-size:11px; margin-bottom:1px; }
+      .info-card-value { font-size:clamp(12px,1.8dvh,15px); }
+
+      .section-label { flex-shrink:0; font-size:11px; margin-bottom:4px; }
+
+      .calendar {
+        flex: 1 1 0 !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        margin-bottom: 0 !important;
+      }
+
+      .cal-header { flex-shrink:0; padding:clamp(5px,0.8dvh,9px) 12px; }
+      .cal-header span { font-size:11px; }
+
+      .cal-row {
+        flex: 1 1 0 !important;
+        min-height: 0 !important;
+        display: grid !important;
+        grid-template-columns: 1.8fr 2fr 1fr !important;
+        align-items: center;
+        padding: 0 12px !important;
+        border-bottom: 0.5px solid var(--border-tertiary);
+      }
+      .cal-row:last-child { border-bottom:none; }
+      .day-name { font-size:13px; }
+      .day-date { font-size:11px; }
+      .range { font-size:13px; }
+      .check-btn { width:clamp(20px,2.8dvh,26px); height:clamp(20px,2.8dvh,26px); }
+      .check-btn i { font-size:13px; }
+
+      .progress-bar-wrap { flex-shrink:0; margin-bottom:0 !important; padding:0.6dvh 0; }
+      .progress-top { margin-bottom:3px; }
+      .progress-top span { font-size:11px !important; }
+      .progress-track { height:4px; }
+
+      .footer { flex-shrink:0; padding:0.4dvh 0; font-size:10px; }
+    }
+
     .cal-header {
       display: grid;
       grid-template-columns: 2fr 2.5fr 1fr;
@@ -294,102 +372,7 @@
 
     .footer a { color: var(--text-info); text-decoration: none; }
 
-    @media (max-width: 480px) {
-      html, body {
-        height: 100dvh;
-        overflow: hidden;
-      }
-
-      body {
-        padding: 0;
-        align-items: stretch;
-      }
-
-      .container {
-        height: 100dvh;
-        display: flex;
-        flex-direction: column;
-        padding: 0 0.75rem;
-        overflow: hidden;
-      }
-
-      .top-nav {
-        flex-shrink: 0;
-        padding: 1.5dvh 0 1dvh;
-        margin-bottom: 0;
-      }
-      .timeline-btn, .calendar-btn { font-size: 12px; padding: 5px 10px; }
-
-      .week-header {
-        flex-shrink: 0;
-        margin-bottom: 0;
-        padding: 1.2dvh 0;
-      }
-      .portion-title { font-size: 11px; margin-bottom: 2px; }
-      .portion-name { font-size: clamp(16px, 3.5dvh, 24px); line-height: 1.2; }
-      .portion-hebrew { font-size: clamp(13px, 2dvh, 18px); }
-
-      .info-grid {
-        flex-shrink: 0;
-        gap: 6px;
-        margin-bottom: 0;
-        padding: 1dvh 0 1.5dvh;
-      }
-      .info-card { padding: clamp(6px, 1dvh, 10px) 10px; }
-      .info-card-label { font-size: 11px; margin-bottom: 1px; }
-      .info-card-value { font-size: clamp(12px, 1.8dvh, 15px); }
-
-      .section-label {
-        flex-shrink: 0;
-        font-size: 11px;
-        margin-bottom: 5px;
-      }
-
-      /* 캘린더 테이블이 남은 공간 전부 차지 */
-      .calendar {
-        flex: 1;
-        margin-bottom: 0;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-      }
-
-      .cal-header {
-        flex-shrink: 0;
-        padding: clamp(6px, 1dvh, 10px) 12px;
-      }
-      .cal-header span { font-size: 11px; }
-
-      .cal-row {
-        flex: 1;
-        padding: 0 12px;
-        min-height: 0;
-        grid-template-columns: 1.8fr 2fr 1fr;
-        border-bottom: 0.5px solid var(--border-tertiary);
-      }
-      .cal-row:last-child { border-bottom: none; }
-      .day-name { font-size: clamp(12px, 1.8dvh, 15px); }
-      .day-date { font-size: clamp(11px, 1.5dvh, 13px); }
-      .range { font-size: clamp(12px, 1.8dvh, 15px); }
-      .check-btn { width: clamp(20px, 2.8dvh, 26px); height: clamp(20px, 2.8dvh, 26px); }
-      .check-btn i { font-size: clamp(12px, 1.8dvh, 15px); }
-
-      .progress-bar-wrap {
-        flex-shrink: 0;
-        margin-bottom: 0;
-        padding: 0.8dvh 0;
-      }
-      .progress-top { margin-bottom: 3px; }
-      .progress-top span { font-size: 11px !important; }
-      .progress-track { height: 4px; }
-
-      .footer {
-        flex-shrink: 0;
-        padding: 0.5dvh 0;
-        font-size: 10px;
-      }
-    }
+    
   
     /* ── 라이트모드 강제 고정 ── */
     :root, body {
@@ -402,7 +385,6 @@
 </head>
 <body>
   <div class="container">
-
     <div class="top-nav">
       <a href="calendor_timeline.html" class="timeline-btn">
         <i class="ti ti-list"></i>
@@ -537,6 +519,7 @@
       const weekStart = toKoDate(weekDates[0]);
       const weekEnd   = toKoDate(weekDates[6]);
 
+      // loading 제거하고 콘텐츠 삽입
       document.getElementById('app').innerHTML = `
         <div class="week-header">
           <div>
@@ -589,11 +572,8 @@
       `;
 
       const cal = document.getElementById('calendar');
-      // 모바일에서 행 균등 분배를 위해 flex 컨테이너로
-      if(window.innerWidth <= 480) {
-        cal.style.display = 'flex';
-        cal.style.flexDirection = 'column';
-      }
+      cal.style.display = 'flex';
+      cal.style.flexDirection = 'column';
 
       function save() { localStorage.setItem(key, JSON.stringify(checked)); }
 
