@@ -74,7 +74,7 @@
 
     /* 요일 헤더 */
     .dow-row { display:grid; grid-template-columns:repeat(7,1fr); border-bottom:0.5px solid var(--border); }
-    .dow-cell { padding:9px 0; text-align:center; font-size:12px; font-weight:500; color:var(--text3); }
+    .dow-cell { padding:7px 0; text-align:center; font-size:12px; font-weight:500; color:#1a1a18; }
     .dow-cell.sun { color:var(--text-sun); }
     .dow-cell.sat { color:var(--text-sat); }
 
@@ -87,13 +87,25 @@
 
     /* 날짜 셀 */
     .dc {
-      min-height:78px; padding:7px 8px 4px;
+      min-height:110px; padding:6px 8px 6px;
       border-right:0.5px solid var(--border);
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      cursor: default;
     }
+    a.dc { cursor: pointer; }
+    a.dc:hover { background: #f0f4f8; }
     .dc:last-child { border-right:none; }
 
-    .dn { font-size:13px; color:var(--text); line-height:1; }
-    .dc.other .dn { color:var(--text3); }
+    .dn {
+      font-size:12px; color:var(--text); line-height:1;
+      text-align: center;
+      width: 24px;
+      margin: 0 auto;
+      padding-top: 2px;
+    }
+    .dc.other .dn { color:var(--text3); font-size:11px; width:auto; text-align:center; }
 
     .dc.sun-col:not(.other) .dn { color:var(--text-sun); }
     .dc.sat-col:not(.other) .dn { color:var(--text-sat); }
@@ -113,28 +125,42 @@
     /* 셀 내 포션 표시 */
     .cell-parsha {
       display: block;
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
       color: #444;
       text-decoration: none;
-      margin-top: 4px;
-      line-height: 1.3;
+      margin-top: 16px;
+      line-height: 1.4;
       word-break: keep-all;
+      overflow: hidden;
     }
     .cell-parsha:hover { color: var(--text-info); }
-    .cell-parsha.current { color: #1a1a18; font-weight: 700; }
-    .cell-parsha.sat { font-size: 10px; font-weight: 700; color: #444; }
+    .cell-parsha.current { color: #1a1a18; }
+    .cell-parsha.sat { color: #444; }
     .cell-parsha.sat.current { color: #1a1a18; }
-    .cell-parsha.special { color: #6b4fa0; }
+    .cell-parsha.special {
+      color: #888;
+      font-weight: 400;
+      text-align: center;
+      width: 100%;
+    }
+    .dc.special-cell { background: #f2f2f0; }
+    .dc.special-cell .dn { color: #aaa; }
 
     .cell-aliyah {
-      font-size: 10px;
+      font-size: 12px;
       color: var(--text2);
-      margin-top: 2px;
-      line-height: 1.3;
+      margin-top: 4px;
+      line-height: 1.2;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    /* 토요일은 br태그로 줄바꿈하므로 nowrap 해제 */
+    .dc.sat-col .cell-aliyah {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: unset;
     }
 
     /* 로딩 */
@@ -147,11 +173,31 @@
     .footer { text-align:center; font-size:12px; color:var(--text3); padding-top:1.5rem; }
     .footer a { color:var(--text-info); text-decoration:none; }
 
-    @media(max-width:600px) {
-      .month-title { font-size:20px; }
-      .dc { min-height:56px; padding:5px 3px 2px; }
-      .dn { font-size:11px; }
-      .cell-parsha { font-size:9px; }
+    @media(max-width:768px) {
+      body { padding: 1rem 0.5rem; }
+      .month-title { font-size:18px; }
+      .top-nav { margin-bottom:1rem; }
+      .back-btn { font-size:11px; padding:5px 8px; }
+      .dow-cell { font-size:9px; padding:6px 0; }
+      .dc { min-height:120px; padding:4px 3px 5px; overflow:hidden; }
+      .dn { font-size:9px; }
+      .cell-parsha { font-size:9px; margin-top:8px; line-height:1.3; word-break:keep-all; white-space:normal; }
+      .cell-aliyah { font-size:9px; margin-top:3px; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .dc.sat-col .cell-aliyah { white-space:normal; overflow:visible; text-overflow:unset; }
+    }
+
+    @media(max-width:480px) {
+      .dc { min-height:110px; padding:4px 2px 5px; }
+      .dn { font-size:8px; }
+      .cell-parsha { font-size:8px; margin-top:7px; }
+      .cell-aliyah { font-size:8px; }
+    }
+
+    @media(max-width:380px) {
+      .dc { min-height:95px; padding:3px 2px 4px; }
+      .dn { font-size:7.5px; }
+      .cell-parsha { font-size:7.5px; margin-top:6px; }
+      .cell-aliyah { font-size:7.5px; }
     }
   
     /* ── 라이트모드 강제 고정 ── */
@@ -221,6 +267,11 @@
   function rangeKo(r) {
     return r.replace(/Genesis|Exodus|Leviticus|Numbers|Deuteronomy/g, m => BOOK_KO[m]||m);
   }
+  // 모바일용: "레위기 21:1-21:16" → "레위기<br>21:1-21:16"
+  function rangeKoMobile(r) {
+    const ko = rangeKo(r);
+    return ko.replace(/^(창세기|출애굽기|레위기|민수기|신명기) (\S)/, '$1<br>$2');
+  }
 
   // 토라 포션 전체 고정 주차 (1~54번째 포션 순서)
   // 합쳐진 포션(더블 파샤)은 단독 포션과 같은 번호 부여
@@ -286,7 +337,8 @@
         const ley = it.leyning || {};
         const aliyot = [null]; // index 0 비움, aliyot[1]~aliyot[6]
         for(let i=1;i<=6;i++) aliyot.push(ley[String(i)] || null);
-        parshaMap[d] = { name: koName, weekNum, aliyot };
+        const summary = ley['summary'] || null;
+        parshaMap[d] = { name: koName, weekNum, aliyot, summary };
       }
       if(it.category==='holiday'){
         const date = new Date(d+'T00:00:00');
@@ -321,7 +373,7 @@
   let M = new Date().getMonth()+1;
 
   async function render() {
-    document.getElementById('mtitle').textContent = `${MKO[M-1]} | ${Y}`;
+    document.getElementById('mtitle').textContent = `${Y}년 ${MKO[M-1]}`;
     const cal = document.getElementById('cal');
     cal.innerHTML = `<div class="loading"><div class="sp"></div><span>불러오는 중...</span></div>`;
 
@@ -343,9 +395,10 @@
       const d=new Date(Y,M-1,n);
       cells.push({d,iso:toISO(d),cur:d.getMonth()===M-1,other:false,dow:d.getDay()});
     }
-    const rem=(7-cells.length%7)%7;
-    for(let i=1;i<=rem;i++){
-      const d=new Date(Y,M,i);
+    // 항상 42칸(6주) 고정 — 뒤를 다음달 날짜로 채움
+    let nextDay = 1;
+    while(cells.length < 42){
+      const d=new Date(Y,M,nextDay++);
       cells.push({d,iso:toISO(d),cur:false,other:true,dow:d.getDay()});
     }
 
@@ -377,6 +430,9 @@
     weeks.forEach(week=>{
       html+=`<div class="week-row">`;
 
+      const isMobile = window.innerWidth <= 768;
+      const rangeFn = isMobile ? rangeKoMobile : rangeKo;
+
       week.forEach(cell=>{
         const sc = cell.dow===0?'sun-col':cell.dow===6?'sat-col':'';
         const tc = cell.iso===todayISO?'today':'';
@@ -384,31 +440,58 @@
         const parsha = (!cell.other) ? getParshaForCell(cell) : null;
 
         let parshaHtml = '';
+        let cellHref = '';
+
         if(parsha) {
           const isSpecial = parsha.name === '__special__';
           const isCurrent = (parsha.shabbatISO || cell.iso) === thisShabbat;
 
           if(isSpecial) {
-            parshaHtml = `<div class="cell-parsha special">특별 낭독</div>`;
+            parshaHtml = `<span class="cell-parsha special">특별 낭독 주간</span>`;
+
           } else if(cell.dow === 6) {
-            // 토요일: 포션명 표시 (알리야1 구절)
-            const shabbatISO = cell.iso;
+            // 토요일: 포션명 + 전체 범위(aliyot1 시작 ~ aliyot6 끝)
+            cellHref = `index.html?shabbat=${cell.iso}`;
             const cls = isCurrent ? 'cell-parsha sat current' : 'cell-parsha sat';
-            const range = parsha.aliyot?.[1] ? `<div class="cell-aliyah">${rangeKo(parsha.aliyot[1])}</div>` : '';
-            parshaHtml = `<a class="${cls}" href="index.html?shabbat=${shabbatISO}">${parsha.name}</a>${range}`;
+            const a1 = parsha.aliyot?.[1];
+            const a6 = parsha.aliyot?.[6] || parsha.aliyot?.[5] || parsha.aliyot?.[4];
+            let fullRange = '';
+            if(a1 && a6) {
+              const start = a1.split('-')[0].trim();
+              const end   = a6.split('-').pop().trim();
+              if(isMobile) {
+                // "레위기 25:1" → "레위기<br>25:1 - 27:15"
+                const startKo = rangeKo(start).replace(/^(창세기|출애굽기|레위기|민수기|신명기) (\S)/, '$1<br>$2');
+                fullRange = `${startKo} - ${end}`;
+              } else {
+                fullRange = `${rangeKo(start)} - ${end}`;
+              }
+            } else if(a1) {
+              fullRange = rangeFn(a1);
+            }
+            const rangeHtml = fullRange ? `<span class="cell-aliyah">${fullRange}</span>` : '';
+            parshaHtml = `<span class="${cls}">${parsha.name}</span>${rangeHtml}`;
+
           } else {
             // 일~금: 포션명 + 알리야 번호 + 구절
-            const shabbatISO = parsha.shabbatISO;
+            cellHref = `index.html?shabbat=${parsha.shabbatISO}`;
             const cls = isCurrent ? 'cell-parsha current' : 'cell-parsha';
-            const range = parsha.aliyot?.[parsha.aliyah] ? `<div class="cell-aliyah">${rangeKo(parsha.aliyot[parsha.aliyah])}</div>` : '';
-            parshaHtml = `<a class="${cls}" href="index.html?shabbat=${shabbatISO}">${parsha.name} ${parsha.aliyah}</a>${range}`;
+            const aliyahRange = parsha.aliyot?.[parsha.aliyah];
+            const rangeHtml = aliyahRange ? `<span class="cell-aliyah">${rangeFn(aliyahRange)}</span>` : '';
+            parshaHtml = `<span class="${cls}">${parsha.name} ${parsha.aliyah}</span>${rangeHtml}`;
           }
         }
 
-        html+=`<div class="dc ${sc} ${tc} ${oc}">
-          <div class="dn">${cell.d.getDate()}</div>
+        const dayNum = cell.d.getDate();
+        const dnText = (cell.other && dayNum === 1) ? `${cell.d.getMonth()+1}월 1일` : dayNum;
+        const tag = cellHref ? 'a' : 'div';
+        const hrefAttr = cellHref ? `href="${cellHref}"` : '';
+        const specialCls = (parsha?.name === '__special__') ? 'special-cell' : '';
+
+        html+=`<${tag} class="dc ${sc} ${tc} ${oc} ${specialCls}" ${hrefAttr}>
+          <div class="dn">${dnText}</div>
           ${parshaHtml}
-        </div>`;
+        </${tag}>`;
       });
 
       html+=`</div>`;
