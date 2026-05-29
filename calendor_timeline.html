@@ -25,10 +25,12 @@
       --accent: #195FA4;
       --accent-soft: #DEEBF8;
       --border: rgba(0,0,0,0.08);
+      --border-tertiary: rgba(0,0,0,0.08);
       --border-current: #195FA4;
       --line: rgba(0,0,0,0.1);
       --radius: 12px;
       --radius-sm: 8px;
+      --radius-md: 8px;
     }
 
     
@@ -37,51 +39,70 @@
       font-family: 'Noto Sans KR', sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       padding: 0;
+    }
+
+    .page-scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
     }
 
     /* 전체 최대 너비 컨테이너 */
     .page-inner {
-      max-width: 760px;
+      max-width: 680px;
       margin: 0 auto;
       padding: 0 1.5rem;
     }
 
-    @media (max-width: 480px) {
-      .page-inner { padding: 0 0.75rem; }
+    @media (max-width: 800px) {
+      .page-inner { max-width: 100%; padding: 0 0.75rem; }
     }
 
     /* ── 상단 헤더 ── */
     .header {
-      position: sticky;
-      top: 0;
+      flex-shrink: 0;
       z-index: 100;
       background: var(--bg);
       border-bottom: 0.5px solid var(--border);
-      backdrop-filter: blur(8px);
+      overflow: hidden;
     }
 
     .header-inner {
-      max-width: 760px;
+      max-width: 680px;
       margin: 0 auto;
-      padding: 0.9rem 1.5rem;
+      padding: 0 1.5rem;
+      height: 56px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
     }
 
-    @media (max-width: 480px) {
-      .header-inner { padding: 0.9rem 0.75rem; }
+    @media (max-width: 800px) {
+      .header-inner { max-width: 100%; padding: 0 0.75rem; height: 44px; gap: 0.5rem; }
+      .back-btn { font-size: 12px; padding: 5px 10px; height: 30px; }
+      html, body { height: 100dvh; }
+    }
+    @media (max-width: 420px) {
+      .header-inner { padding: 0 0.5rem; gap: 0.25rem; }
+      .back-btn { padding: 5px 8px; font-size: 11px; }
+      .back-btn .btn-label { display: none; }
+      .year-label { font-size: 13px; }
     }
 
     .back-btn {
       display: inline-flex; align-items: center; gap: 6px;
       font-size: 13px; color: var(--text-info); text-decoration: none;
-      padding: 6px 12px; border: 0.5px solid var(--border);
-      border-radius: var(--radius-sm); background: var(--bg-card);
+      padding: 6px 12px; border: 0.5px solid var(--border-tertiary);
+      border-radius: var(--radius-md); background: var(--bg-card, #fff);
       transition: all .15s; white-space: nowrap;
+      height: 32px; box-sizing: border-box;
     }
     .back-btn:hover { border-color: var(--text-info); }
 
@@ -108,9 +129,17 @@
       text-align: center;
     }
 
+    @media (max-width: 800px) {
+      .year-label {
+        font-size: 14px;
+        min-width: 0;
+        white-space: nowrap;
+      }
+    }
+
     /* ── 현재 포션 요약 배너 ── */
     .current-banner {
-      max-width: 760px;
+      max-width: 680px;
       margin: 1rem auto 0;
       padding-left: 1.5rem;
       padding-right: 1.5rem;
@@ -129,8 +158,8 @@
 
     .banner-inner:hover { opacity: 0.85; }
 
-    @media (max-width: 480px) {
-      .current-banner { padding-left: 0.75rem; padding-right: 0.75rem; }
+    @media (max-width: 800px) {
+      .current-banner { max-width: 100%; margin: 1rem 0 0; padding-left: 0.75rem; padding-right: 0.75rem; }
     }
 
     .current-dot {
@@ -164,10 +193,17 @@
 
     /* ── 월 그룹 ── */
     .timeline {
-      padding: 0.75rem 1rem 1.5rem;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0.75rem 1.5rem 1.5rem;
       display: flex;
       flex-direction: column;
       gap: 0;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 800px) {
+      .timeline { max-width: 100%; margin: 0; padding: 0.75rem 0.75rem 1.5rem; }
     }
 
     .month-group { margin-bottom: 0.75rem; }
@@ -180,7 +216,7 @@
       text-transform: none;
       padding: 1.2rem 0 0.6rem;
       position: sticky;
-      top: 57px;
+      top: 0;
       background: var(--bg);
       z-index: 10;
     }
@@ -278,6 +314,13 @@
       font-family: 'Noto Serif KR', serif;
       line-height: 1.3;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (max-width: 800px) {
+      .card-name { font-size: 15px; }
+      .card-book { font-size: 12px; }
     }
 
     .card-book {
@@ -364,7 +407,24 @@
       color: var(--text-special);
     }
 
-    .parsha-card.special:hover { transform: none; }
+    .parsha-card.special.past:hover { transform: none; }
+
+    /* 이번 주가 특별 낭독 주간인 경우 */
+    .parsha-card.special.current .card-date {
+      background: var(--bg-current);
+      border-color: var(--border-current);
+    }
+    .parsha-card.special.current .card-body {
+      background: var(--bg-current);
+      border-color: var(--border-current);
+    }
+    .parsha-card.special.current .card-name,
+    .parsha-card.special.current .card-book {
+      color: var(--text-current);
+    }
+    .parsha-card.special.current .card-week-num {
+      color: var(--text-current);
+    }
 
     /* 지난 특별 낭독 주간도 흐리게 */
     .parsha-card.special.past .card-date,
@@ -430,7 +490,7 @@
   <div class="header">
     <div class="header-inner">
       <a href="index.html" class="back-btn">
-        <i class="ti ti-arrow-left"></i> 오늘 토라포션
+        <i class="ti ti-arrow-left"></i><span class="btn-label"> 오늘 토라포션</span>
       </a>
       <div class="header-center">
         <button class="year-btn" onclick="changeYear(-1)"><i class="ti ti-chevron-left"></i></button>
@@ -438,28 +498,28 @@
         <button class="year-btn" onclick="changeYear(1)"><i class="ti ti-chevron-right"></i></button>
       </div>
       <a href="calendar.html" class="back-btn">
-        <i class="ti ti-calendar"></i> 캘린더 보기
+        <i class="ti ti-calendar"></i><span class="btn-label"> 캘린더 보기</span>
       </a>
     </div>
   </div>
 
-  <div id="banner" style="display:none" class="current-banner" onclick="scrollToCurrentWeek()" title="이번 주 포션으로 이동">
-    <div class="banner-inner" style="cursor:pointer;">
-      <div class="current-dot"></div>
-      <div style="flex:1">
-        <div class="current-label">이번 주 포션</div>
-        <div class="current-name" id="banner-name">—</div>
-        <div class="current-range" id="banner-range">—</div>
+  <div class="page-scroll">
+    <div id="banner" style="display:none" class="current-banner" onclick="scrollToCurrentWeek()" title="이번 주 포션으로 이동">
+      <div class="banner-inner" style="cursor:pointer;">
+        <div class="current-dot"></div>
+        <div style="flex:1">
+          <div class="current-label">이번 주 포션</div>
+          <div class="current-name" id="banner-name">—</div>
+          <div class="current-range" id="banner-range">—</div>
+        </div>
+        <div style="color:var(--text-current); font-size:18px; padding-left:8px;">›</div>
       </div>
-      <div style="color:var(--text-current); font-size:18px; padding-left:8px;">›</div>
     </div>
-  </div>
 
-  <div class="page-inner">
     <div id="app">
       <div class="loading"><div class="sp"></div><span>포션 일정 불러오는 중...</span></div>
     </div>
-    <div class="footer">
+    <div class="footer page-inner">
       포션 일정: <a href="https://www.hebcal.com/sedrot/" target="_blank">Hebcal Jewish Calendar</a>
     </div>
   </div>
@@ -661,12 +721,21 @@
 
     // 배너
     const currentItem = parshaMap[thisShabbat];
-    if(currentItem && !currentItem.__special__){
-      const wn = getWeekNum(currentItem.title||'');
-      document.getElementById('banner-name').textContent = (wn ? `${wn}주차 ` : '') + pKo(currentItem.title||'');
-      const range = currentItem.leyning?.torah || '';
-      document.getElementById('banner-range').textContent = formatRange(range) || '성경 범위';
-      document.getElementById('banner').style.display = 'flex';
+    if(currentItem) {
+      if(currentItem.__special__) {
+        document.getElementById('banner-name').textContent = '특별 낭독 주간';
+        document.getElementById('banner-range').textContent = '명절 특별 낭독';
+        const bannerEl = document.getElementById('banner');
+        bannerEl.onclick = () => location.href = `special.html?shabbat=${thisShabbat}`;
+        bannerEl.title = '특별 낭독 주간으로 이동';
+        bannerEl.style.display = 'flex';
+      } else {
+        const wn = getWeekNum(currentItem.title||'');
+        document.getElementById('banner-name').textContent = (wn ? `${wn}주차 ` : '') + pKo(currentItem.title||'');
+        const range = currentItem.leyning?.torah || '';
+        document.getElementById('banner-range').textContent = formatRange(range) || '성경 범위';
+        document.getElementById('banner').style.display = 'flex';
+      }
     }
 
     // 월별 그룹핑
@@ -698,8 +767,9 @@
 
         if(isSpecial) {
           const isPastSpecial = iso < thisShabbat;
+          const extraCls = isPastSpecial ? ' past' : (isCurrent ? ' current' : '');
           html += `
-            <div class="parsha-card special${isPastSpecial ? ' past' : ''}">
+            <a class="parsha-card special${extraCls}" href="special.html?shabbat=${iso}" data-iso="${iso}">
               <div class="card-date">
                 <div class="date-month">${monthSh}</div>
                 <div class="date-day">${dayNum}</div>
@@ -714,7 +784,7 @@
                   </div>
                 </div>
               </div>
-            </div>`;
+            </a>`;
           return;
         }
 
@@ -782,7 +852,8 @@
       }
     }
 
-    window.addEventListener('scroll', syncLabel, { passive: true });
+    const scrollEl = document.querySelector('.page-scroll');
+    if(scrollEl) scrollEl.addEventListener('scroll', syncLabel, { passive: true });
     syncLabel(); // 초기 실행
   }
 

@@ -29,6 +29,9 @@
       --bar-current-text: #fff;
       --bar-special: #e8e0f5;
       --bar-special-text: #6b4fa0;
+      --bg-primary: #ffffff;
+      --border-tertiary: rgba(0,0,0,0.09);
+      --radius-md: 8px;
     }
 
     
@@ -38,19 +41,21 @@
       background: var(--bg2);
       color: var(--text);
       min-height: 100vh;
-      padding: 2rem 1rem;
+      padding: 0 1.5rem;
     }
 
     .wrap { max-width: 980px; margin: 0 auto; }
 
     /* 네비 */
-    .top-nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; }
+    .top-nav { position:sticky; top:0; z-index:100; background:var(--bg2); display:flex; justify-content:space-between; align-items:center; height:48px; padding:0; margin-bottom:1.5rem; flex-shrink:0; }
 
     .back-btn {
       display:inline-flex; align-items:center; gap:6px;
       font-size:13px; color:var(--text-info); text-decoration:none;
-      padding:6px 12px; border:0.5px solid var(--border);
-      border-radius:8px; background:var(--bg); transition:all .15s;
+      padding:6px 12px; border:0.5px solid var(--border-tertiary);
+      border-radius:var(--radius-md); background:var(--bg-primary);
+      transition:all .15s; white-space:nowrap;
+      height:32px; box-sizing:border-box;
     }
     .back-btn:hover { border-color:var(--text-info); background:var(--bg-info); }
 
@@ -176,8 +181,10 @@
     @media(max-width:768px) {
       body { padding: 1rem 0.5rem; }
       .month-title { font-size:18px; }
-      .top-nav { margin-bottom:1rem; }
-      .back-btn { font-size:11px; padding:5px 8px; }
+      body { padding: 0 0.75rem; }
+      .top-nav { margin-bottom:1rem; height:48px; }
+      .back-btn { font-size:12px; padding:5px 10px; height:30px; }
+      .top-nav { height:48px; }
       .dow-cell { font-size:9px; padding:6px 0; }
       .dc { min-height:120px; padding:4px 3px 5px; overflow:hidden; }
       .dn { font-size:9px; }
@@ -447,6 +454,8 @@
           const isCurrent = (parsha.shabbatISO || cell.iso) === thisShabbat;
 
           if(isSpecial) {
+            const satISO = cell.dow === 6 ? cell.iso : parsha.shabbatISO;
+            cellHref = `special.html?shabbat=${satISO}`;
             parshaHtml = `<span class="cell-parsha special">특별 낭독 주간</span>`;
 
           } else if(cell.dow === 6) {

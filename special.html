@@ -14,15 +14,19 @@
     :root {
       --bg: #f7f6f2;
       --bg-card: #ffffff;
+      --bg-primary: #ffffff;
       --bg-info: #DEEBF8;
       --text: #1c1a16;
       --text2: #5a5a5a;
       --text3: #999;
       --accent: #195FA4;
+      --text-info: #195FA4;
       --border: rgba(0,0,0,0.09);
+      --border-tertiary: rgba(0,0,0,0.12);
       --border-accent: #195FA4;
       --radius: 14px;
       --radius-sm: 10px;
+      --radius-md: 8px;
     }
 
     /* 라이트모드 강제 고정 */
@@ -42,24 +46,37 @@
     .wrap {
       max-width: 640px;
       margin: 0 auto;
-      padding: 1.5rem 1.25rem 3rem;
+      padding: 0 1.25rem 3rem;
     }
 
     /* 상단 네비 */
     .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 2rem;
+      height: 48px;
+      padding: 0;
+      margin-bottom: 1rem;
+      flex-shrink: 0;
     }
 
     .nav-btn {
       display: inline-flex; align-items: center; gap: 6px;
-      font-size: 13px; color: var(--accent); text-decoration: none;
-      padding: 6px 12px; border: 0.5px solid var(--border);
-      border-radius: 8px; background: var(--bg-card); transition: all .15s;
+      font-size: 13px; color: var(--text-info); text-decoration: none;
+      padding: 6px 12px; border: 0.5px solid var(--border-tertiary);
+      border-radius: var(--radius-md); background: var(--bg-primary);
+      transition: all .15s; white-space: nowrap;
+      height: 32px; box-sizing: border-box;
     }
-    .nav-btn:hover { border-color: var(--accent); background: var(--bg-info); }
+    .nav-btn:hover { border-color: var(--text-info); background: var(--bg-info); }
+    @media (max-width: 800px) {
+      .top-nav { height: 48px; }
+      .nav-btn { font-size: 12px; padding: 5px 10px; height: 30px; }
+    }
 
     /* 메인 카드 */
     .main-card {
@@ -203,8 +220,8 @@
 <div class="wrap">
 
   <div class="top-nav">
-    <a href="index.html" class="nav-btn"><i class="ti ti-arrow-left"></i> 오늘 토라포션</a>
-    <a href="calendor_timeline.html" class="nav-btn"><i class="ti ti-list"></i> 포션 일정</a>
+    <a href="calendor_timeline.html" class="nav-btn"><i class="ti ti-list"></i> 타임라인 보기</a>
+    <a href="calendar.html" class="nav-btn"><i class="ti ti-calendar"></i> 캘린더 보기</a>
   </div>
 
   <div id="app">
